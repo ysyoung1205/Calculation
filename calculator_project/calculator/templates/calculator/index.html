@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .calculator {
+            display: inline-block;
+            text-align: center;
+        }
+        .display {
+            width: 240px;
+            height: 40px;
+            margin-bottom: 10px;
+            text-align: right;
+            font-size: 20px;
+            padding-right: 10px;
+        }
+        .button {
+            width: 50px;
+            height: 50px;
+            margin: 2px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .row {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <input type="text" id="display" class="display" disabled>
+        <div class="row">
+            <button class="button" onclick="append('/')">/</button>
+            <button class="button" onclick="deletRecent()">CE</button> 
+            {% comment %} CE는 메모리에서 가장 최근에 추가된 데이터가 지워짐(지금 입력하던 숫자 지우기)
+                          C는 입력된 모든 데이터를 지움/ 리셋 {% endcomment %}
+            <button class="button" onclick="clearDisplay()">C</button>
+            <button class="button" onclick="deleteDisplay()">←</button>
+        </div>
+        <div class="row">
+            <button class="button" onclick="reciprocal()">¹/x</button> 
+            {% comment %} 역수 계산 {% endcomment %}
+            <button class="button" onclick="pow()">x²</button>
+            <button class="button" onclick="sqrt()">√</button>
+            <button class="button" onclick="append('/')">/</button>
+        </div>
+        <div class="row">
+            <button class="button" onclick="append('7')">7</button>
+            <button class="button" onclick="append('8')">8</button>
+            <button class="button" onclick="append('9')">9</button>
+            <button class="button" onclick="append('*')">X</button>
+        </div>
+        <div class="row">
+            <button class="button" onclick="append('4')">4</button>
+            <button class="button" onclick="append('5')">5</button>
+            <button class="button" onclick="append('6')">6</button>
+            <button class="button" onclick="append('-')">-</button>
+        </div>
+        <div class="row">
+            <button class="button" onclick="append('1')">1</button>
+            <button class="button" onclick="append('2')">2</button>
+            <button class="button" onclick="append('3')">3</button>
+            <button class="button" onclick="append('+')">+</button>
+        </div>
+        <div class="row">
+            <button class="button" onclick="clearDisplay()">C</button>
+            <button class="button" onclick="append('0')">0</button>       
+            <button class="button" onclick="append('.')">.</button>
+            <button class="button" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        function append(value) {
+            document.getElementById('display').value += value;
+        }
+
+        function clearDisplay() {
+            document.getElementById('display').value = '';
+        }
+        
+        function deleteDisplay() {
+            const display = document.getElementById('display');
+            display.value = display.value.slice(0, -1); // 마지막 문자 제거
+        }
+
+        function deletRecent() {
+            const display = document.getElementById('display');
+            const currentValue = display.value;
+            // 연산자를 기준으로 계산식 나누기
+            const parts = currentValue.split(/([+\-*/])/); // 연산자 포함 분리
+            console.log(parts); // 디버깅: 나눠진 배열 확인
+           // 마지막 숫자 또는 연산자 제거
+            if (parts.length > 1) {
+                parts.pop(); // 배열의 마지막 항목 제거
+                display.value = parts.join(''); // 나머지 값 다시 합침
+            } else {
+                display.value = ''; // 숫자 하나만 있을 경우 전체 삭제
+            }
+
+        }
+
+        function pow() {
+            const display = document.getElementById('display');
+            display.value = Math.pow(display.value,2)
+        }
+
+        function sqrt() {
+            const display = document.getElementById('display');
+            const currentValue = parseFloat(display.value); // 현재 화면 값 가져오기 (숫자로 변환)
+
+            if (currentValue < 0) {
+                display.value = "Error";  // 음수의 제곱근은 실수가 아님
+            } else {
+                display.value = Math.sqrt(currentValue); // 제곱근 계산
+            }
+        }
+
+        function calculate() {
+            const expression = document.getElementById('display').value;
+            fetch('/calculate/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: 'expression=' + encodeURIComponent(expression)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('display').value = data.result;
+            })
+            .catch(error => {
+                document.getElementById('display').value = 'Error';
+            });
+        }
+    </script>
+</body>
+</html>
