@@ -13,6 +13,6 @@ def calculate(request):
             result = eval(expression)  # 수식 계산 (주의: 보안 문제 주의)
         except Exception:
             result = "Error"
-        return JsonResponse({'result': result})  # 결과를 JSON으로 반환
+        return JsonResponse({'expression': expression,'result': result})  # 결과를 JSON으로 반환
     return JsonResponse({'result': 'Invalid request'})
 

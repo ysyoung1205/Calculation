@@ -14,6 +14,16 @@
             display: inline-block;
             text-align: center;
         }
+
+        .displayAll {
+            width: 240px;
+            height: 40px;
+            margin-bottom: 10px;
+            text-align: right;
+            font-size: 20px;
+            padding-right: 10px;
+        }
+
         .display {
             width: 240px;
             height: 40px;
@@ -22,6 +32,7 @@
             font-size: 20px;
             padding-right: 10px;
         }
+
         .button {
             width: 50px;
             height: 50px;
@@ -36,9 +47,11 @@
 </head>
 <body>
     <div class="calculator">
+        <input type="text" id="displayAll" class="displayAll" disabled>
+        <br>
         <input type="text" id="display" class="display" disabled>
         <div class="row">
-            <button class="button" onclick="append('/')">/</button>
+            <button class="button" onclick="percent()">%</button>
             <button class="button" onclick="deletRecent()">CE</button> 
             {% comment %} CE는 메모리에서 가장 최근에 추가된 데이터가 지워짐(지금 입력하던 숫자 지우기)
                           C는 입력된 모든 데이터를 지움/ 리셋 {% endcomment %}
@@ -78,18 +91,48 @@
         </div>
     </div>
 
-    <script>
+    <script>        
         function append(value) {
-            document.getElementById('display').value += value;
-        }
+            const display = document.getElementById('display');  
+            const displayAll = document.getElementById('displayAll');  
+            const lastValue = displayAll.value.slice(-1);
+
+            if(!isNaN(value)){ //숫자라면 
+                if(display.value === ''){
+                    display.value += value;  
+                }else if(/([+\-*/])/.test(lastValue)){
+                    display.value = ''
+                    display.value += value; 
+                }else{
+                    display.value += value;  
+                }
+              
+            }else{
+                if(display.value !== ''){ //숫자가 아니고 display가 공백이 아니라면
+                    displayAll.value += display.value + value;
+                   // display.value = ''
+                    
+                 } else if (/([+\-*/])/.test(lastValue)) {
+                    displayAll.value = displayAll.value.slice(0, -1) + value;
+
+                    }else{
+                    // display가 비어 있고 이전 입력이 숫자라면, 연산자 추가
+                    displayAll.value += value;
+                 }
+            }
+        }              
+         
 
         function clearDisplay() {
             document.getElementById('display').value = '';
+            document.getElementById('displayAll').value = '';
         }
         
-        function deleteDisplay() {
-            const display = document.getElementById('display');
-            display.value = display.value.slice(0, -1); // 마지막 문자 제거
+        function deleteDisplay() { //숫자라면 뒤에서 하나씩 지우기 (연산자에는 영향X)
+            const display = document.getElementById('display');     
+            if(!isNaN(display.value.slice(-1))){
+                display.value = display.value.slice(0, -1);
+            }
         }
 
         function deletRecent() {
@@ -97,17 +140,22 @@
             const currentValue = display.value;
             // 연산자를 기준으로 계산식 나누기
             const parts = currentValue.split(/([+\-*/])/); // 연산자 포함 분리
-            console.log(parts); // 디버깅: 나눠진 배열 확인
+        
            // 마지막 숫자 또는 연산자 제거
             if (parts.length > 1) {
                 parts.pop(); // 배열의 마지막 항목 제거
                 display.value = parts.join(''); // 나머지 값 다시 합침
             } else {
                 display.value = ''; // 숫자 하나만 있을 경우 전체 삭제
+                //displayAll.value = ''; 
             }
 
         }
 
+        function percent() {
+            //@@@@숫자각각 적용되게 변경하기
+            document.getElementById('display').value *= 0.01;
+        }
         function pow() {
             const display = document.getElementById('display');
             display.value = Math.pow(display.value,2)
@@ -124,8 +172,19 @@
             }
         }
 
+        function reciprocal(){
+            const display = document.getElementById('display');
+            const displayAll = document.getElementById('displayAll');
+            display.value = 1/display.value
+            //displayAll.value = "1/(" + display.value + ")" //displayAll에는 1/(3)
+
+        }
+
         function calculate() {
-            const expression = document.getElementById('display').value;
+            const displayAll = document.getElementById('displayAll');
+            const display = document.getElementById('display');
+            const expression = displayAll.value + display.value;
+            //const expression = document.getElementById('display').value;
             fetch('/calculate/', {
                 method: 'POST',
                 headers: {
@@ -136,7 +195,12 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('display').value = data.result;
+                if (data.result === "Error") {
+                    display.value = "Error"; // 오류 시 결과 표시
+                } else {
+                    display.value = data.result; // 결과를 현재 화면에 표시
+                    displayAll.value = data.expression + " = "; // 전체 계산식 업데이트
+                }
             })
             .catch(error => {
                 document.getElementById('display').value = 'Error';
