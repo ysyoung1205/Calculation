@@ -1,0 +1,45 @@
+<script>
+    function append(value) {
+        const display = document.getElementById('display');
+        const displayAll = document.getElementById('displayAll');
+        const lastValue = displayAll.value.slice(-1);
+    
+        
+            // 계산이 완료된 상태인지 확인
+        if (displayAll.value.endsWith('=')) {
+            if (!isNaN(value)) {
+                // 숫자를 입력하면 화면을 초기화하고 새 입력 시작
+                displayAll.value = '';
+                display.value = value;
+                displayAll.value += value;
+            } else {
+                // 연산자를 입력하면 이전 결과를 유지하고 이어서 계산
+                displayAll.value = display.value + value;
+            }
+            return;
+        }
+
+        
+        
+        if (!isNaN(value) || value === ".") {
+            // 숫자나 소수점일 경우
+            if (value === "." )
+                if(display.value.includes(".")) return; // 중복 소수점 방지
+                if(display.value==="") {
+                    value = "0.";
+                    return; 
+                }
+            //if (/([+\-*/=])/.test(lastValue)) display.value = ""; // 연산자 뒤 초기화
+            display.value += value;
+            displayAll.value += value;
+        } else {
+            // 연산자일 경우
+            if (/([+\-*/])/.test(lastValue)) {
+                displayAll.value = displayAll.value.slice(0, -1) + value; // 중복 연산자 방지
+            } else if (display.value !== "") {
+                displayAll.value += value;
+            }
+        }
+    }
+</script>
+     
