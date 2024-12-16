@@ -14,6 +14,14 @@
             display: inline-block;
             text-align: center;
         }
+        .show-button{ 
+
+            margin: 2px;
+            font-size: 15px;
+            cursor: pointer;
+            text-align: right;
+
+        }
 
         .displayAll {
             width: 240px;
@@ -44,19 +52,66 @@
             margin-bottom: 5px;
         }
 
-        .box {
+        {% comment %} .box {
             width: 140px;
             height: 30px;
             margin-bottom: 10px;
             text-align: right;
             font-size: 15px;
             padding-right: 10px;
-        }
-        .convert{
+        } {% endcomment %}
+        .base-filed{
             width: 240px;
             text-align: left;
-
-
+            font-size: 10px;
+            padding-right: 10px;
+            
+        }
+        .base-label{
+            width: 240px;
+            height: 20px;
+            margin-bottom: 10px;
+            text-align: right;
+            font-size: 15px;
+            padding-right: 10px;
+            border: none;
+        }
+        .hidden {
+            display: none;
+        }
+        
+        .base-container {
+            margin-top: 10px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 200px;
+            text-align: left;
+        }
+        
+        .base-field {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .base-input {
+            width: 100px;
+            text-align: right;
+        }
+        
+        .toggle-button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color:rgb(173, 218, 111);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .toggle-button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -87,6 +142,8 @@
             event.preventDefault();
         }
     });
+    
+  
 
     function append(value) {
         const display = document.getElementById('display');  
@@ -264,75 +321,59 @@
         });
     }
 
-    {% comment %} function convertTo(){
-        const display = document.getElementById('display');
-        const displayBin = document.getElementById('displayBin');
-        const displayOct = document.getElementById('displayOct');
-        const displayHex = document.getElementById('displayHex');
+    // 2진법, 8진법, 16진법으로 변환하여 출력하는 함수
+    function convertToOthers() {
+        console.log('convertToOthers is called!');
 
-        const binary = value.toString(2);
-        const currentValue = value.toString(8);
-        const hexadecimal = value.toString(16);
+    const display = document.getElementById('display');
+    const displayBin = document.getElementById('displayBin');
+    const displayOct = document.getElementById('displayOct');
+    const displayDec = document.getElementById('displayDec');
+    const displayHex = document.getElementById('displayHex');
 
-    } {% endcomment %}
+    // 문자 -> 숫자
+    const currentValue = parseFloat(display.value);
 
-        // 2진법, 8진법, 16진법으로 변환하여 출력하는 함수
-        function convertToOthers() {
-            console.log('convertToOthers is called!');
 
-        const display = document.getElementById('display');
-        const displayBin = document.getElementById('displayBin');
-        const displayOct = document.getElementById('displayOct');
-        const displayDec = document.getElementById('displayDec');
-        const displayHex = document.getElementById('displayHex');
+    const binary = currentValue.toString(2); // 2진법
+    const octal = currentValue.toString(8);  // 8진법
+    const decimal = currentValue
+    const hexadecimal = currentValue.toString(16).toUpperCase(); // 16진법 (대문자)
 
-        // 문자 -> 숫자
-        const currentValue = parseFloat(display.value);
+    displayBin.value = binary;
+    displayOct.value = octal;
+    displayDec.value = currentValue;
+    displayHex.value = hexadecimal;
+    }
 
-        // 값이 숫자가 아니거나 비어 있으면 변환하지 않음
-        /**if (isNaN(currentValue)) {
-            displayBin.value = '';
-            displayOct.value = '';
-            displayHex.value = '';
-            return;
-        }**/
-
-        const binary = currentValue.toString(2); // 2진법
-        const octal = currentValue.toString(8);  // 8진법
-        const decimal = currentValue
-        const hexadecimal = currentValue.toString(16).toUpperCase(); // 16진법 (대문자)
-
-        displayBin.value = binary;
-        displayOct.value = octal;
-        displayDec.value = currentValue;
-        displayHex.value = hexadecimal;
-        }
-
-// 숫자가 입력될 때마다 변환 함수 호출
 
 </script>
 <body>
     <div class="calculator">
+        <div class="show-button"><button id="toggleBases" class="toggle-button">Show</button></div>
         <input type="text" id="displayAll" class="displayAll" disabled>
         <br>
         <input type="text" id="display" class="display" oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
-        <br>
-        <div class="convert">
-            <div>
-                <label>HEX</label>
-                <input type="text" id="displayHex">
-            </div>
-            <div>
-                <label>DEC</label>
-                <input type="text" id="displayDec" >
-            </div>
-            <div>
-                <label>OCT</label>
-                <input type="text" id="displayOct" >
-            </div>
-            <div>
-                <label>BIN</label>
-                <input type="text" id="displayBin">
+        
+        
+        <div id="baseContainer" class="base-container hidden">
+            <div class="base-filed">
+                <div>
+                    <label>HEX</label>
+                    <input type="text" class="base-label" id="displayHex">
+                </div>
+                <div>
+                    <label>DEC</label>
+                    <input type="text" class="base-label" id="displayDec" >
+                </div>
+                <div>
+                    <label>OCT</label>
+                    <input type="text" class="base-label" id="displayOct" >
+                </div>
+                <div>
+                    <label>BIN</label>
+                    <input type="text" class="base-label" id="displayBin">
+                </div>
             </div>
         </div>
        
@@ -378,6 +419,19 @@
         </div>
     </div>
 
-
+<script>
+    document.getElementById('toggleBases').addEventListener('click', function () {
+        const baseContainer = document.getElementById('baseContainer');
+        const toggleButton = document.getElementById('toggleBases');
+    
+        if (baseContainer.classList.contains('hidden')) {
+            baseContainer.classList.remove('hidden');
+            toggleButton.textContent = 'Hide';
+        } else {
+            baseContainer.classList.add('hidden');
+            toggleButton.textContent = 'Show';
+        }
+    });
+</script>
 </body>
 </html>
