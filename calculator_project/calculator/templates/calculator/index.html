@@ -1,378 +1,40 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculator</title>
-    <style>
-        body {
-
-            text-align: center;
-            margin-top: 50px;
-        }
-        .calculator {
-            display: inline-block;
-            text-align: center;
-        }
-        .show-button{ 
-
-            margin: 2px;
-            font-size: 15px;
-            cursor: pointer;
-            text-align: right;
-
-        }
-
-        .displayAll {
-            width: 240px;
-            height: 40px;
-            margin-bottom: 10px;
-            text-align: right;
-            font-size: 20px;
-            padding-right: 10px;
-        }
-
-        .display {
-            width: 240px;
-            height: 100px;
-            margin-bottom: 10px;
-            text-align: right;
-            font-size: 20px;
-            padding-right: 10px;
-        }
-
-        .button {
-            width: 50px;
-            height: 50px;
-            margin: 2px;
-            font-size: 18px;
-            cursor: pointer;
-        }
-        .row {
-            margin-bottom: 5px;
-        }
-
-        {% comment %} .box {
-            width: 140px;
-            height: 30px;
-            margin-bottom: 10px;
-            text-align: right;
-            font-size: 15px;
-            padding-right: 10px;
-        } {% endcomment %}
-        .base-filed{
-            width: 240px;
-            text-align: left;
-            font-size: 10px;
-            padding-right: 10px;
-            
-        }
-        .base-label{
-            width: 240px;
-            height: 20px;
-            margin-bottom: 10px;
-            text-align: right;
-            font-size: 15px;
-            padding-right: 10px;
-            border: none;
-        }
-        .hidden {
-            display: none;
-        }
-        
-        .base-container {
-            margin-top: 10px;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            width: 200px;
-            text-align: left;
-        }
-        
-        .base-field {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-        
-        .base-input {
-            width: 100px;
-            text-align: right;
-        }
-        
-        .toggle-button {
-            margin-top: 10px;
-            padding: 5px 10px;
-            background-color:rgb(173, 218, 111);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        .toggle-button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'calculator/styles.css' %}">       
 </head>
-<script>        
-    let flag = false;
-    let operator_clicked = false;
-
-    //키보드 입력 시
-    document.addEventListener("keydown", function(event) {
-        const display = document.getElementById("display");
-        const validNum = "0123456789.";
-        const validOp = "+-*/";
-        
-        if (validNum.includes(event.key)) {                   
-            append(event.key);
-             event.preventDefault();
-           // display.value += event.key; // 키 입력 추가
-        } else if (validOp.includes(event.key)) {
-            operator(event.key);
-            event.preventDefault(); 
-        } else if (event.key === "Enter") {
-            calculate(); // 엔터로 계산 실행
-        } else if (event.key === "Backspace") {
-            const display = document.getElementById("display");
-            display.value = display.value.slice(0, -1);
-            event.preventDefault();
-        }else{
-            event.preventDefault();
-        }
-    });
-    
-  
-
-    function append(value) {
-        const display = document.getElementById('display');  
-        const displayAll = document.getElementById('displayAll');  
-        const lastValue = displayAll.value.slice(-1);      
-
-        if(!flag){
-            if(!isNaN(value)|| value ==="."){ //숫자이거나 . 이면
-                if (value === "." && display.value.includes(".")) {// 소수점이 이미 입력된 경우 추가 입력 방지                     
-                    return;
-                }
-                if (value === "." && displayAll.value==="") {// 빈 셀에 . 입력시 0. 으로 변환                     
-                    value = "0.";
-                }
-                if(display.value==="0" && value != "."){
-                    display.value = ''
-                    display.value = value;   // '0' 뒤에 숫자 입력 시 대체      
-                }else if (/([+\-*/])/.test(lastValue)) { 
-                    // 연산자 뒤에 숫자 입력 시 display 초기화 후 입력
-                    if(operator_clicked){
-                        display.value='';
-                        operator_clicked = false;
-                    }
-                    display.value += value; 
-                    console.log("2");
-                } else {
-                    // 숫자 연속 입력 처리
-                    display.value += value; 
-                    console.log("3");
-                }
-               // displayAll.value += value; // 전체 식에 입력 추가
-            }
-
-        }else {//flag가 true 일 때, 다음 입력 값이 숫자이면 리셋/ 연산자이면 이전 결괏값에 이어서 계산       
-
-                displayAll.value = '';
-                display.value = value;
-                flag = false;
-        }
-        operator_clicked = false; 
-        convertToOthers();      
-
-    }
-          
-
-    function operator(value){
-        const display = document.getElementById('display');  
-        const displayAll = document.getElementById('displayAll');  
-        const lastValue = displayAll.value.slice(-1);
-
-        if(display.value==="")return;
-      
-       
-        if(!flag){
-            if(!operator_clicked){ // 연산자가 없다면
-                displayAll.value += display.value+value;
-                operator_clicked = true;
-                console.log("operator_clicked : ", operator_clicked)   
-            }else{
-                if(/([+\-*/])/.test(lastValue)) {//연산자 연 속 입력 시 연산자 바뀜
-                    displayAll.value = displayAll.value.slice(0, -1) + value;
-                }else if(display.value !== ''){ //숫자가 아니고 display가 공백이 아니라면
-                    displayAll.value += display.value +value; // 연산자 추가
-                    //currentValue = displayAll.value
-                    //displayAll.value = display.value + value;
-                    //flag = false;
-                    operator_clicked = true;
-                    console.log("operator_clicked : ", operator_clicked)              
-                }else{
-                    displayAll.value += value;        
-                }
-            }
-        }else{
-            displayAll.value = display.value + value;
-            operator_clicked = true;
-            console.log("operator_clicked!!!! : ", operator_clicked)  
-            flag = false; 
-        }
-
-    }         
-
-    function clearDisplay() {
-        document.getElementById('display').value = '';
-        document.getElementById('displayAll').value = '';
-    }
-    
-    function deleteDisplay() { //숫자라면 뒤에서 하나씩 지우기 (연산자에는 영향X)
-        const display = document.getElementById('display');     
-        if(!isNaN(display.value.slice(-1))){
-            display.value = display.value.slice(0, -1);
-        }
-    }
-
-    function deletRecent() { //CE
-        const display = document.getElementById('display');
-        const currentValue = display.value;
-        // 연산자를 기준으로 계산식 나누기
-        const parts = currentValue.split(/([+\-*/])/); // 연산자 포함 분리
-    
-       // 마지막 숫자 또는 연산자 제거
-        if (parts.length > 1) {
-            parts.pop(); // 배열의 마지막 항목 제거
-            display.value = parts.join(''); // 나머지 값 다시 합침
-        } else {
-            display.value = ''; // 숫자 하나만 있을 경우 전체 삭제
-            //displayAll.value = ''; 
-        }
-
-    }
-
-    function percent() {
-        //@@@@숫자각각 적용되게 변경하기
-        document.getElementById('display').value *= 0.01;
-    }
-    function pow() {
-        const display = document.getElementById('display');
-        display.value = Math.pow(display.value,2) // x의 제곱
-    }
-
-    function sqrt() {
-        const display = document.getElementById('display');
-        const currentValue = parseFloat(display.value); // 현재 화면 값 가져오기 (숫자로 변환)
-
-        if (currentValue < 0) {
-            display.value = "Error";  // 음수의 제곱근은 실수가 아님
-        } else {
-            display.value = Math.sqrt(currentValue); // 제곱근 계산
-        }
-    }
-
-    function reciprocal(){
-        const display = document.getElementById('display');
-        const displayAll = document.getElementById('displayAll');
-        display.value = 1/display.value  //역수
-        //displayAll.value = "1/(" + display.value + ")" //displayAll에는 1/(3)
-
-    }
-    function formatNumber(num) {
-        if (!isNaN(num)) {
-            return Number(num).toLocaleString(); // 숫자를 1,000 형식으로 변환
-        }
-        return num; // 숫자가 아니면 그대로 반환
-    }
-   
-
-    function calculate() {
-        const displayAll = document.getElementById('displayAll');
-        const display = document.getElementById('display');
-        const expression = displayAll.value+display.value;
-        const formmatNumber = expression.toLocaleString
-        //const expression = document.getElementById('display').value;
-
-        fetch('/calculate/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: 'expression=' + encodeURIComponent(expression)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.result === "Error") {
-                display.value = "Error"; // 오류 시 결과 표시
-            } else {
-                display.value =  formatNumber(data.result); // 결과를 현재 화면에 표시
-                displayAll.value = data.expression + " = "; // 전체 계산식 업데이트
-                flag = true;
-                console.log("flag: ",flag);
-                convertToOthers();
-            }
-        })
-        .catch(error => {
-            document.getElementById('display').value = 'Error';
-        });
-    }
-
-    // 2진법, 8진법, 16진법으로 변환하여 출력하는 함수
-    function convertToOthers() {
-        console.log('convertToOthers is called!');
-
-    const display = document.getElementById('display');
-    const displayBin = document.getElementById('displayBin');
-    const displayOct = document.getElementById('displayOct');
-    const displayDec = document.getElementById('displayDec');
-    const displayHex = document.getElementById('displayHex');
-
-    // 문자 -> 숫자
-    const currentValue = parseFloat(display.value);
-
-
-    const binary = currentValue.toString(2); // 2진법
-    const octal = currentValue.toString(8);  // 8진법
-    const decimal = currentValue
-    const hexadecimal = currentValue.toString(16).toUpperCase(); // 16진법 (대문자)
-
-    displayBin.value = binary;
-    displayOct.value = octal;
-    displayDec.value = currentValue;
-    displayHex.value = hexadecimal;
-    }
-
-
-</script>
 <body>
     <div class="calculator">
         <div class="show-button"><button id="toggleBases" class="toggle-button">Show</button></div>
-        <input type="text" id="displayAll" class="displayAll" disabled>
+        {% comment %} <input type="text" id="displayAll" class="displayAll" disabled> {% endcomment %}
+        <textarea id="displayAll" class="displayAll"></textarea>
         <br>
-        <input type="text" id="display" class="display" oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
+        {% comment %} <input type="text" id="display" class="display" oninput="this.value = this.value.replace(/[^0-9.]/g, '')"> {% endcomment %}
+        {% comment %} <input type="text" id="display" class="displayT" oninput="this.value = this.value.replace(/[^0-9.]/g, '')"> {% endcomment %}
+        <textarea id="display" class="display"></textarea>
         
         
         <div id="baseContainer" class="base-container hidden">
-            <div class="base-filed">
-                <div>
+            <div >
+                <div class="base-field">
                     <label>HEX</label>
-                    <input type="text" class="base-label" id="displayHex">
+                    <input type="text" class="base-input" id="displayHex">
                 </div>
-                <div>
+                <div class="base-field">
                     <label>DEC</label>
-                    <input type="text" class="base-label" id="displayDec" >
+                    <input type="text" class="base-input" id="displayDec" >
                 </div>
-                <div>
+                <div class="base-field">
                     <label>OCT</label>
-                    <input type="text" class="base-label" id="displayOct" >
+                    <input type="text" class="base-input" id="displayOct" >
                 </div>
-                <div>
+                <div class="base-field"> 
                     <label>BIN</label>
-                    <input type="text" class="base-label" id="displayBin">
+                    <input type="text" class="base-input" id="displayBin">
                 </div>
             </div>
         </div>
@@ -418,20 +80,10 @@
             <button class="button" onclick="calculate()">=</button>
         </div>
     </div>
-
+{% csrf_token %}
 <script>
-    document.getElementById('toggleBases').addEventListener('click', function () {
-        const baseContainer = document.getElementById('baseContainer');
-        const toggleButton = document.getElementById('toggleBases');
-    
-        if (baseContainer.classList.contains('hidden')) {
-            baseContainer.classList.remove('hidden');
-            toggleButton.textContent = 'Hide';
-        } else {
-            baseContainer.classList.add('hidden');
-            toggleButton.textContent = 'Show';
-        }
-    });
+    const csrfToken = '{{ csrf_token }}';
 </script>
+<script src="{% static 'calculator/script.js' %}"></script>
 </body>
 </html>

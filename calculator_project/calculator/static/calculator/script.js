@@ -4,29 +4,47 @@ let operator_clicked = false;
 //키보드 입력 시
 document.addEventListener("keydown", function(event) {
     const display = document.getElementById("display");
-    const validKeys = "0123456789.+-*/";
+    const validNum = "0123456789.";
+    const validOp = "+-*/";
     
-    if (validKeys.includes(event.key)) {                   
+    if (validNum.includes(event.key)) {                   
         append(event.key);
-         event.preventDefault(); // 기본 동작 방지
+         event.preventDefault();
+         //console.log("event.key ", event.key);
        // display.value += event.key; // 키 입력 추가
+    } else if (validOp.includes(event.key)) {
+        operator(event.key);
+        event.preventDefault(); 
     } else if (event.key === "Enter") {
         calculate(); // 엔터로 계산 실행
     } else if (event.key === "Backspace") {
         const display = document.getElementById("display");
         display.value = display.value.slice(0, -1);
         event.preventDefault();
-        //display.value = display.value.slice(0, -1); // 마지막 문자 삭제
     }else{
         event.preventDefault();
     }
 });
 
+function updateDisplayLayout(display) {
+    const length = display.value.length;
+    console.log("length : ", length);
+    
+    // 스크롤을 오른쪽 끝으로 이동
+    display.scrollLeft = display.scrollWidth;
+}
+function updateDisplayAllLayout(displayAll) {
+    const length = display.value.length;
+    console.log("length : ", length);
+    
+    // 스크롤을 오른쪽 끝으로 이동
+    displayAll.scrollLeft = disdisplayAll.scrollWidth;
+}
+
 function append(value) {
     const display = document.getElementById('display');  
     const displayAll = document.getElementById('displayAll');  
-    const lastValue = displayAll.value.slice(-1);
-    console.log("flag: ",flag);
+    const lastValue = displayAll.value.slice(-1);      
 
     if(!flag){
         if(!isNaN(value)|| value ==="."){ //숫자이거나 . 이면
@@ -48,7 +66,6 @@ function append(value) {
                 display.value += value; 
                 console.log("2");
             } else {
-                
                 // 숫자 연속 입력 처리
                 display.value += value; 
                 console.log("3");
@@ -60,13 +77,14 @@ function append(value) {
 
             displayAll.value = '';
             display.value = value;
-            displayAll.value += value;
-            console.log("flag가 true, 숫자")
-            //return;
             flag = false;
     }
-    operator_clicked = false;
-    console.log("operator_clicked : ", operator_clicked)    
+    operator_clicked = false; 
+    convertToOthers();   
+    
+      // 여기서 display 레이아웃 업데이트
+      updateDisplayLayout(display);
+
 }
       
 
@@ -99,10 +117,9 @@ function operator(value){
         }
     }else{
         displayAll.value = display.value + value;
+        operator_clicked = true;
         console.log("operator_clicked!!!! : ", operator_clicked)  
         flag = false; 
-
-
     }
 
 }         
@@ -117,6 +134,7 @@ function deleteDisplay() { //숫자라면 뒤에서 하나씩 지우기 (연산�
     if(!isNaN(display.value.slice(-1))){
         display.value = display.value.slice(0, -1);
     }
+
 }
 
 function deletRecent() { //CE
@@ -163,6 +181,7 @@ function reciprocal(){
     //displayAll.value = "1/(" + display.value + ")" //displayAll에는 1/(3)
 
 }
+
 function formatNumber(num) {
     if (!isNaN(num)) {
         return Number(num).toLocaleString(); // 숫자를 1,000 형식으로 변환
@@ -170,22 +189,19 @@ function formatNumber(num) {
     return num; // 숫자가 아니면 그대로 반환
 }
 
+
 function calculate() {
     const displayAll = document.getElementById('displayAll');
     const display = document.getElementById('display');
     const expression = displayAll.value+display.value;
-    const formmatNumber = expression.toLocaleString
+    //const formmatNumber = expression.toLocaleString
     //const expression = document.getElementById('display').value;
-
-    // 숫자 형식 포맷팅 함수
-
-
 
     fetch('/calculate/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': '{{ csrf_token }}'
+            'X-CSRFToken': csrfToken 
         },
         body: 'expression=' + encodeURIComponent(expression)
     })
@@ -198,9 +214,45 @@ function calculate() {
             displayAll.value = data.expression + " = "; // 전체 계산식 업데이트
             flag = true;
             console.log("flag: ",flag);
+            convertToOthers();
         }
     })
     .catch(error => {
         document.getElementById('display').value = 'Error';
     });
 }
+
+// 2진법, 8진법, 16진법으로 변환하여 출력하는 함수
+function convertToOthers() {
+    const display = document.getElementById('display');
+    const displayBin = document.getElementById('displayBin');
+    const displayOct = document.getElementById('displayOct');
+    const displayDec = document.getElementById('displayDec');
+    const displayHex = document.getElementById('displayHex');
+
+    // 문자 -> 숫자
+    const currentValue = parseFloat(display.value);
+    const binary = currentValue.toString(2); // 2진법
+    const octal = currentValue.toString(8);  // 8진법
+    const decimal = currentValue
+    const hexadecimal = currentValue.toString(16).toUpperCase(); // 16진법 (대문자)
+
+        displayBin.value = binary;
+        displayOct.value = octal;
+        displayDec.value = decimal;
+        displayHex.value = hexadecimal;
+}
+
+    document.getElementById('toggleBases').addEventListener('click', function () {
+        const baseContainer = document.getElementById('baseContainer');
+        const toggleButton = document.getElementById('toggleBases');
+    
+        if (baseContainer.classList.contains('hidden')) {
+            baseContainer.classList.remove('hidden');
+            toggleButton.textContent = 'Hide';
+        } else {
+            baseContainer.classList.add('hidden');
+            toggleButton.textContent = 'Show';
+        }
+        
+    });
