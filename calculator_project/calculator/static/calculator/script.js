@@ -15,9 +15,12 @@ document.addEventListener("keydown", function(event) {
     } else if (validOp.includes(event.key)) {
         operator(event.key);
         event.preventDefault(); 
-    } else if (event.key === "Enter") {
+    } 
+    else if (event.key === "Enter") {     
         calculate(); // 엔터로 계산 실행
-    } else if (event.key === "Backspace") {
+        event.preventDefault(); // 기본 동작 방지
+    } 
+    else if (event.key === "Backspace") {
         const display = document.getElementById("display");
         display.value = display.value.slice(0, -1);
         event.preventDefault();
@@ -27,18 +30,11 @@ document.addEventListener("keydown", function(event) {
 });
 
 function updateDisplayLayout(display) {
-    const length = display.value.length;
-    console.log("length : ", length);
-    
-    // 스크롤을 오른쪽 끝으로 이동
     display.scrollLeft = display.scrollWidth;
 }
+
 function updateDisplayAllLayout(displayAll) {
-    const length = display.value.length;
-    console.log("length : ", length);
-    
-    // 스크롤을 오른쪽 끝으로 이동
-    displayAll.scrollLeft = disdisplayAll.scrollWidth;
+    displayAll.scrollLeft = displayAll.scrollWidth;
 }
 
 function append(value) {
@@ -46,12 +42,17 @@ function append(value) {
     const displayAll = document.getElementById('displayAll');  
     const lastValue = displayAll.value.slice(-1);      
 
+    if(isNaN(display.value)){  //NAN, ERROR 등 값 처리
+        display.value = ''
+        displayAll.value = ''
+    }
+  
     if(!flag){
         if(!isNaN(value)|| value ==="."){ //숫자이거나 . 이면
             if (value === "." && display.value.includes(".")) {// 소수점이 이미 입력된 경우 추가 입력 방지                     
                 return;
             }
-            if (value === "." && displayAll.value==="") {// 빈 셀에 . 입력시 0. 으로 변환                     
+            if (value === "." && display.value==="") {// 빈 셀에 . 입력시 0. 으로 변환                     
                 value = "0.";
             }
             if(display.value==="0" && value != "."){
@@ -84,6 +85,7 @@ function append(value) {
     
       // 여기서 display 레이아웃 업데이트
       updateDisplayLayout(display);
+      updateDisplayAllLayout(displayAll);
 
 }
       
@@ -121,6 +123,7 @@ function operator(value){
         console.log("operator_clicked!!!! : ", operator_clicked)  
         flag = false; 
     }
+    updateDisplayAllLayout(displayAll);
 
 }         
 
@@ -189,6 +192,14 @@ function formatNumber(num) {
     return num; // 숫자가 아니면 그대로 반환
 }
 
+function addToMemory(result) {
+    const memoryList = document.getElementById('memory-list');
+    const listItem = document.createElement('li');
+    
+    listItem.textContent = result;
+    memoryList.appendChild(listItem);
+}
+
 
 function calculate() {
     const displayAll = document.getElementById('displayAll');
@@ -212,47 +223,128 @@ function calculate() {
         } else {
             display.value =  formatNumber(data.result); // 결과를 현재 화면에 표시
             displayAll.value = data.expression + " = "; // 전체 계산식 업데이트
+            memoryUpdate = displayAll.value + display.value 
             flag = true;
             console.log("flag: ",flag);
             convertToOthers();
+            // DOM 업데이트 이후 호출
+            setTimeout(() => {
+                updateDisplayAllLayout(displayAll);
+            }, 0);
+            addToMemory(memoryUpdate); // 결과를 메모리에 추가
         }
     })
     .catch(error => {
         document.getElementById('display').value = 'Error';
     });
+
+
 }
 
 // 2진법, 8진법, 16진법으로 변환하여 출력하는 함수
-function convertToOthers() {
-    const display = document.getElementById('display');
-    const displayBin = document.getElementById('displayBin');
-    const displayOct = document.getElementById('displayOct');
-    const displayDec = document.getElementById('displayDec');
-    const displayHex = document.getElementById('displayHex');
+    function convertToOthers() {
+        const display = document.getElementById('display');
+        const displayBin = document.getElementById('displayBin');
+        const displayOct = document.getElementById('displayOct');
+        const displayDec = document.getElementById('displayDec');
+        const displayHex = document.getElementById('displayHex');
+        // 문자 -> 숫자
+        const currentValue = parseFloat(display.value);
+        const binary = currentValue.toString(2); // 2진법
+        const octal = currentValue.toString(8);  // 8진법
+        const decimal = currentValue
+        const hexadecimal = currentValue.toString(16).toUpperCase(); // 16진법 (대문자)
 
-    // 문자 -> 숫자
-    const currentValue = parseFloat(display.value);
-    const binary = currentValue.toString(2); // 2진법
-    const octal = currentValue.toString(8);  // 8진법
-    const decimal = currentValue
-    const hexadecimal = currentValue.toString(16).toUpperCase(); // 16진법 (대문자)
-
-        displayBin.value = binary;
-        displayOct.value = octal;
-        displayDec.value = decimal;
-        displayHex.value = hexadecimal;
-}
+            displayBin.value = binary;
+            displayOct.value = octal;
+            displayDec.value = decimal;
+            displayHex.value = hexadecimal;
+    }
 
     document.getElementById('toggleBases').addEventListener('click', function () {
         const baseContainer = document.getElementById('baseContainer');
         const toggleButton = document.getElementById('toggleBases');
+        //const toggleButton = document.getElementById('toggleBases');
+        
     
         if (baseContainer.classList.contains('hidden')) {
             baseContainer.classList.remove('hidden');
             toggleButton.textContent = 'Hide';
+            baseContainer.style.maxHeight = `${baseContainer.offsetHeight}px`;
+            height = baseContainer.style.maxHeight
+            console.log("height : ", height);
+
         } else {
             baseContainer.classList.add('hidden');
             toggleButton.textContent = 'Show';
         }
         
     });
+
+
+
+        // 계산 결과를 메모리 영역에 추가하는 함수
+
+
+    // // 계산이 완료되었을 때 호출
+    // function calculateResult() {
+    //     const display = document.querySelector('.display');
+    //     const result = eval(display.value); // 결과 계산
+    //     display.value = result; // 디스플레이 업데이트
+    //     addToMemory(result); // 메모리에 추가
+    //     console.log("result@@@@@@ : ", result);
+
+    // }
+
+
+    // 버튼 클릭 이벤트 예제
+  //  document.querySelector('.equals-button').addEventListener('click', calculateResult);
+    // 메모리 열기/닫기 토글
+    document.getElementById('toggleMemory').addEventListener('click', function () {
+        toggleMemory();
+    });
+        
+        
+    function toggleMemory(){   
+        const memorySidebar = document.getElementById('memorySidebar');
+        
+        const toggleButton = document.getElementById('toggleMemory');
+
+        if (memorySidebar.classList.contains('hidden')) {
+            memorySidebar.classList.remove('hidden');
+           // memorySidebar.classList.add('visible');
+            toggleButton.textContent = 'Hide Memory';
+            // 메모리 높이를 계산기의 높이로 설정
+           // memorySidebar.style.maxHeight = `${calculator.offsetHeight}px`;
+
+        } else {
+           // memorySidebar.classList.remove('visible');
+            memorySidebar.classList.add('hidden');
+            //memorySidebar.style.maxHeight = '0'; // 높이를 0으로 설정
+            toggleButton.textContent = 'Memory';
+        }
+    }
+    // 창 크기 변경 시 메모리 높이 업데이트
+    window.addEventListener('resize', function () {
+        const memorySidebar = document.getElementById('memorySidebar');
+        const calculator = document.querySelector('.calculator');
+
+        // 메모리가 보이는 상태일 때만 높이 재설정
+        if (!memorySidebar.classList.contains('hidden')) {
+            memorySidebar.style.maxHeight = `${calculator.offsetHeight}px`;
+        }
+    });
+
+    // // 페이지 로드 시 초기화
+    // window.addEventListener('load', function () {
+    //     const memorySidebar = document.getElementById('memorySidebar');
+    //     const calculator = document.querySelector('.calculator');
+    //     memorySidebar.style.maxHeight = `${calculator.offsetHeight}px`;
+    // });
+
+    // // 창 크기 변경 시 높이 재설정
+    // window.addEventListener('resize', function () {
+    //     const memorySidebar = document.getElementById('memorySidebar');
+    //     const calculator = document.querySelector('.calculator');
+    //     memorySidebar.style.maxHeight = `${calculator.offsetHeight}px`;
+    // });

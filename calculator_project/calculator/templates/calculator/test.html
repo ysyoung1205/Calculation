@@ -1,45 +1,45 @@
-<script>
-    function append(value) {
-        const display = document.getElementById('display');
-        const displayAll = document.getElementById('displayAll');
-        const lastValue = displayAll.value.slice(-1);
-    
-        
-            // 계산이 완료된 상태인지 확인
-        if (displayAll.value.endsWith('=')) {
-            if (!isNaN(value)) {
-                // 숫자를 입력하면 화면을 초기화하고 새 입력 시작
-                displayAll.value = '';
-                display.value = value;
-                displayAll.value += value;
-            } else {
-                // 연산자를 입력하면 이전 결과를 유지하고 이어서 계산
-                displayAll.value = display.value + value;
-            }
-            return;
-        }
-
-        
-        
-        if (!isNaN(value) || value === ".") {
-            // 숫자나 소수점일 경우
-            if (value === "." )
-                if(display.value.includes(".")) return; // 중복 소수점 방지
-                if(display.value==="") {
-                    value = "0.";
-                    return; 
-                }
-            //if (/([+\-*/=])/.test(lastValue)) display.value = ""; // 연산자 뒤 초기화
-            display.value += value;
-            displayAll.value += value;
-        } else {
-            // 연산자일 경우
-            if (/([+\-*/])/.test(lastValue)) {
-                displayAll.value = displayAll.value.slice(0, -1) + value; // 중복 연산자 방지
-            } else if (display.value !== "") {
-                displayAll.value += value;
-            }
-        }
-    }
-</script>
-     
+<div class="container">
+    <div class="calculator">
+      <!-- 계산기 버튼 및 디스플레이 -->
+      <div class="show-button"><button id="toggleBases" class="toggle-button">Show</button></div>
+      <textarea id="displayAll" class="displayAll"></textarea>
+      <br>
+      <textarea id="display" class="display"></textarea>
+      <div id="baseContainer" class="base-container hidden">
+            <div>
+            <div class="base-field">
+                <label>HEX</label>
+                <input type="text" class="base-input" id="displayHex">
+            </div>
+            <div class="base-field">
+                <label>DEC</label>
+                <input type="text" class="base-input" id="displayDec">
+            </div>
+            <div class="base-field">
+                <label>OCT</label>
+                <input type="text" class="base-input" id="displayOct">
+            </div>
+            <div class="base-field">
+                <label>BIN</label>
+                <input type="text" class="base-input" id="displayBin">
+            </div>
+            </div>
+      </div>
+      <br><br>
+      <div class="row">
+        <button class="button" onclick="percent()">%</button>
+        <button class="button" onclick="deletRecent()">CE</button>
+        <button class="button" onclick="clearDisplay()">C</button>
+        <button class="button" onclick="deleteDisplay()">←</button>
+      </div>
+      <!-- 나머지 버튼 코드 -->
+    </div>
+  
+    <div class="memory-sidebar">
+      <h3>Memory</h3>
+      <ul id="memory-list">
+        <!-- 계산 결과 표시 -->
+      </ul>
+    </div>
+  </div>
+  

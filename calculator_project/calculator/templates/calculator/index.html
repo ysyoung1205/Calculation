@@ -8,76 +8,89 @@
     <link rel="stylesheet" href="{% static 'calculator/styles.css' %}">       
 </head>
 <body>
-    <div class="calculator">
-        <div class="show-button"><button id="toggleBases" class="toggle-button">Show</button></div>
-        {% comment %} <input type="text" id="displayAll" class="displayAll" disabled> {% endcomment %}
-        <textarea id="displayAll" class="displayAll"></textarea>
-        <br>
-        {% comment %} <input type="text" id="display" class="display" oninput="this.value = this.value.replace(/[^0-9.]/g, '')"> {% endcomment %}
-        {% comment %} <input type="text" id="display" class="displayT" oninput="this.value = this.value.replace(/[^0-9.]/g, '')"> {% endcomment %}
-        <textarea id="display" class="display"></textarea>
-        
-        
-        <div id="baseContainer" class="base-container hidden">
-            <div >
-                <div class="base-field">
-                    <label>HEX</label>
-                    <input type="text" class="base-input" id="displayHex">
+    <div class="container">
+        <div id="calculate" class="calculator">
+            <div class="show-button">
+                <button id="toggleBases" class="toggle-button">Show</button>
+                <button id="toggleMemory" class="toggle-button">Memory</button>
+            </div>
+            {% comment %} <input type="text" id="displayAll" class="displayAll" disabled> {% endcomment %}
+            <textarea id="displayAll" class="displayAll"></textarea>
+            <br>
+            {% comment %} <input type="text" id="display" class="display" oninput="this.value = this.value.replace(/[^0-9.]/g, '')"> {% endcomment %}
+            {% comment %} <input type="text" id="display" class="displayT" oninput="this.value = this.value.replace(/[^0-9.]/g, '')"> {% endcomment %}
+            <textarea id="display" class="display"></textarea>         
+            <div id="baseContainer" class="base-container hidden">
+                <div >
+                    <div class="base-field">
+                        <label>HEX</label>
+                        <input type="text" class="base-input" id="displayHex">
+                    </div>
+                    <div class="base-field">
+                        <label>DEC</label>
+                        <input type="text" class="base-input" id="displayDec" >
+                    </div>
+                    <div class="base-field">
+                        <label>OCT</label>
+                        <input type="text" class="base-input" id="displayOct" >
+                    </div>
+                    <div class="base-field"> 
+                        <label>BIN</label>
+                        <input type="text" class="base-input" id="displayBin">
+                    </div>
                 </div>
-                <div class="base-field">
-                    <label>DEC</label>
-                    <input type="text" class="base-input" id="displayDec" >
+            </div>      
+
+            <div class="button-container">
+                <div class="row">
+                    <button class="button" onclick="percent()">%</button>
+                    <button class="button" onclick="deletRecent()">CE</button> 
+                    <!--CE는 메모리에서 가장 최근에 추가된 데이터가 지워짐(지금 입력하던 숫자 지우기)
+                                C는 입력된 모든 데이터를 지움/ 리셋-->
+                    <button class="button" onclick="clearDisplay()">C</button>
+                    <button class="button" onclick="deleteDisplay()">←</button>
                 </div>
-                <div class="base-field">
-                    <label>OCT</label>
-                    <input type="text" class="base-input" id="displayOct" >
+                
+                <div class="row">
+                    <button class="button" onclick="reciprocal()">¹/x</button> 
+                    <!--역수 계산-->
+                    <button class="button" onclick="pow()">x²</button>
+                    <button class="button" onclick="sqrt()">√</button>
+                    <button class="button" onclick="operator('/')">/</button>
                 </div>
-                <div class="base-field"> 
-                    <label>BIN</label>
-                    <input type="text" class="base-input" id="displayBin">
+                <div class="row">
+                    <button class="button" onclick="append('7')">7</button>
+                    <button class="button" onclick="append('8')">8</button>
+                    <button class="button" onclick="append('9')">9</button>
+                    <button class="button" onclick="operator('*')">X</button>
+                </div>
+                <div class="row">
+                    <button class="button" onclick="append('4')">4</button>
+                    <button class="button" onclick="append('5')">5</button>
+                    <button class="button" onclick="append('6')">6</button>
+                    <button class="button" onclick="operator('-')">-</button>
+                </div>
+                <div class="row">
+                    <button class="button" onclick="append('1')">1</button>
+                    <button class="button" onclick="append('2')">2</button>
+                    <button class="button" onclick="append('3')">3</button>
+                    <button class="button" onclick="operator('+')">+</button>
+                </div>
+                <div class="row">
+                    <button class="button" onclick="clearDisplay()">C</button>
+                    <button class="button" onclick="append('0')">0</button>       
+                    <button class="button" onclick="append('.')">.</button>
+                    <button class="button" onclick="calculate()">=</button>
                 </div>
             </div>
         </div>
-       
-       <br><br>
-        <div class="row">
-            <button class="button" onclick="percent()">%</button>
-            <button class="button" onclick="deletRecent()">CE</button> 
-            {% comment %} CE는 메모리에서 가장 최근에 추가된 데이터가 지워짐(지금 입력하던 숫자 지우기)
-                          C는 입력된 모든 데이터를 지움/ 리셋 {% endcomment %}
-            <button class="button" onclick="clearDisplay()">C</button>
-            <button class="button" onclick="deleteDisplay()">←</button>
-        </div>
-        <div class="row">
-            <button class="button" onclick="reciprocal()">¹/x</button> 
-            {% comment %} 역수 계산 {% endcomment %}
-            <button class="button" onclick="pow()">x²</button>
-            <button class="button" onclick="sqrt()">√</button>
-            <button class="button" onclick="operator('/')">/</button>
-        </div>
-        <div class="row">
-            <button class="button" onclick="append('7')">7</button>
-            <button class="button" onclick="append('8')">8</button>
-            <button class="button" onclick="append('9')">9</button>
-            <button class="button" onclick="operator('*')">X</button>
-        </div>
-        <div class="row">
-            <button class="button" onclick="append('4')">4</button>
-            <button class="button" onclick="append('5')">5</button>
-            <button class="button" onclick="append('6')">6</button>
-            <button class="button" onclick="operator('-')">-</button>
-        </div>
-        <div class="row">
-            <button class="button" onclick="append('1')">1</button>
-            <button class="button" onclick="append('2')">2</button>
-            <button class="button" onclick="append('3')">3</button>
-            <button class="button" onclick="operator('+')">+</button>
-        </div>
-        <div class="row">
-            <button class="button" onclick="clearDisplay()">C</button>
-            <button class="button" onclick="append('0')">0</button>       
-            <button class="button" onclick="append('.')">.</button>
-            <button class="button" onclick="calculate()">=</button>
+
+        <!--Memory영역-->
+        <div id="memorySidebar" class="memory-sidebar hidden">
+            <h3>Memory</h3>
+            <ul id="memory-list">
+            <!--계산 결과 표시-->
+            </ul>
         </div>
     </div>
 {% csrf_token %}
