@@ -8,6 +8,7 @@ body {
     justify-content: center; /*가로에서 위치*/
     margin-top: 50px;
     gap: 20px; /*사이 공간 추가*/
+    
 
 
 }
@@ -66,7 +67,7 @@ body {
     /* justify-content: space-between; */
     /* width: 260px; 버튼 영역의 너비 */
     gap: 10px;
-    width: 100%;
+    width: 300px;
     margin: 10px
 }
 
@@ -79,6 +80,8 @@ body {
 }
 
 .row {
+    text-align: center;
+    width: 280px;
     margin-bottom: 5px;
 }
 
