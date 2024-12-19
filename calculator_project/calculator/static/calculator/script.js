@@ -90,7 +90,6 @@ function operator(value){ //연산자 입력 처리
         return;
     }
 
-
     if(isNaN(display.value)){  //NAN, ERROR(문자결과값) 값 처리
         display.value = ''
         displayAll.value = ''
@@ -106,16 +105,7 @@ function operator(value){ //연산자 입력 처리
         
         }else{
             displayAll.value = displayAll.value.slice(0, -1) + value;
-            // if(/([+\-*/])/.test(lastValue)) {//연산자 연속 입력 시 연산자 바뀜
-            // }
-            // else if(display.value !== ''){ //display가 공백이 아니라면
-            //     displayAll.value += display.value +value; // 연산자 추가
-            //     operator_clicked = true;
-            //     console.log("!!operator_clicked : ", operator_clicked)              
-            // }
-            // else{
-            //     displayAll.value += value;        
-            // }
+
         }
     }else{ ////flag가 true 일 때, 이어서 계산
         displayAll.value = display.value + value;
@@ -213,13 +203,6 @@ function reciprocal(){ //¹/x 역수
     display.value = 1/display.value  //역수
 }
 
-// function formatNumber(num) {
-//     if (!isNaN(num)) {
-//         return Number(num).toLocaleString(); // 숫자를 1,000 형식으로 변환
-//     }
-//     return num; // 숫자가 아니면 그대로 반환
-// }
-
 function addToMemory(result) {  //결과값 메모리 list로 올리기
     const memoryList = document.getElementById('memory-list');
     const listItem = document.createElement('li');
@@ -265,8 +248,6 @@ function calculate() {
     .catch(error => {
         document.getElementById('display').value = 'Error';
     });
-
-
 }
 
 function convertToOthers() { // 2진법, 8진법, 16진법으로 변환하여 출력하는 함수
@@ -289,21 +270,24 @@ function convertToOthers() { // 2진법, 8진법, 16진법으로 변환하여 �
 
 document.getElementById('toggleBases').addEventListener('click', function () { //base show , hide button
     const baseContainer = document.getElementById('baseContainer');
-    const toggleButton = document.getElementById('toggleBases');    
+    const toggleButton = document.getElementById('toggleBases');  
+    const memorySidebar = document.getElementById("memorySidebar");  
 
     if (baseContainer.classList.contains('hidden')) {
         baseContainer.classList.remove('hidden');
+        memorySidebar.classList.add('expanded');
         toggleButton.textContent = 'Hide';
     } else {
         baseContainer.classList.add('hidden');
-        toggleButton.textContent = 'Show';
+        memorySidebar.classList.remove('expanded');
+                toggleButton.textContent = 'Show';
     }   
 });
+
 // 메모리 열기/닫기 토글
 document.getElementById('toggleMemory').addEventListener('click', function () {
     toggleMemory();
-});
-        
+});      
 function toggleMemory(){   
     const memorySidebar = document.getElementById('memorySidebar');
     const toggleButton = document.getElementById('toggleMemory');
