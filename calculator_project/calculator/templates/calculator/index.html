@@ -14,12 +14,10 @@
                 <button id="toggleBases" class="toggle-button">Show</button>
                 <button id="toggleMemory" class="toggle-button">Memory</button>
             </div>
-            {% comment %} <input type="text" id="displayAll" class="displayAll" disabled> {% endcomment %}
-            <textarea id="displayAll" class="displayAll"></textarea>
-            <br>
-            {% comment %} <input type="text" id="display" class="display" oninput="this.value = this.value.replace(/[^0-9.]/g, '')"> {% endcomment %}
-            {% comment %} <input type="text" id="display" class="displayT" oninput="this.value = this.value.replace(/[^0-9.]/g, '')"> {% endcomment %}
-            <textarea id="display" class="display"></textarea>         
+            <div class="text_display"> 
+                <textarea id="displayAll" class="displayAll"></textarea>
+                <textarea id="display" class="display"></textarea>         
+            </div>
             <div id="baseContainer" class="base-container hidden">
                 <div >
                     <div class="base-field">
@@ -45,15 +43,12 @@
                 <div class="row">
                     <button class="button" onclick="percent()">%</button>
                     <button class="button" onclick="deletRecent()">CE</button> 
-                    <!--CE는 메모리에서 가장 최근에 추가된 데이터가 지워짐(지금 입력하던 숫자 지우기)
-                                C는 입력된 모든 데이터를 지움/ 리셋-->
                     <button class="button" onclick="clearDisplay()">C</button>
-                    <button class="button" onclick="deleteDisplay()">←</button>
+                    <button class="button" onclick="deleteOne()">←</button>
                 </div>
                 
                 <div class="row">
                     <button class="button" onclick="reciprocal()">¹/x</button> 
-                    <!--역수 계산-->
                     <button class="button" onclick="pow()">x²</button>
                     <button class="button" onclick="sqrt()">√</button>
                     <button class="button" onclick="operator('/')">/</button>
@@ -85,11 +80,11 @@
             </div>
         </div>
 
-        <!--Memory영역-->
+        <!--Memory-->
         <div id="memorySidebar" class="memory-sidebar hidden">
             <h3>Memory</h3>
             <ul id="memory-list">
-            <!--계산 결과 표시-->
+            <!--계산 결과-->
             </ul>
         </div>
     </div>

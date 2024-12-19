@@ -7,135 +7,137 @@ document.addEventListener("keydown", function(event) {
     const validNum = "0123456789.";
     const validOp = "+-*/";
     
-    if (validNum.includes(event.key)) {                   
+    if (validNum.includes(event.key)) {        //숫자                
         append(event.key);
          event.preventDefault();
-         //console.log("event.key ", event.key);
-       // display.value += event.key; // 키 입력 추가
-    } else if (validOp.includes(event.key)) {
+    } else if (validOp.includes(event.key)) {  //연산자
         operator(event.key);
         event.preventDefault(); 
     } 
-    else if (event.key === "Enter") {     
-        calculate(); // 엔터로 계산 실행
-        event.preventDefault(); // 기본 동작 방지
+    else if (event.key === "Enter") {          //엔터
+        calculate(); 
+        event.preventDefault(); 
     } 
-    else if (event.key === "Backspace") {
-        const display = document.getElementById("display");
-        display.value = display.value.slice(0, -1);
+    else if (event.key === "Backspace") {       //백스페이스
+        //const display = document.getElementById("display");
+       // display.value = display.value.slice(0, -1);
+        deleteOne();
         event.preventDefault();
     }else{
         event.preventDefault();
     }
 });
 
-function updateDisplayLayout(display) {
+function updateDisplayLayout(display) {             //스크롤 마지막 입력 지점으로 이동
     display.scrollLeft = display.scrollWidth;
 }
 
-function updateDisplayAllLayout(displayAll) {
+
+function updateDisplayAllLayout(displayAll) {       //스크롤 마지막 입력 지점으로 이동
     displayAll.scrollLeft = displayAll.scrollWidth;
 }
 
-function append(value) {
+function append(value) {   //숫자 및 '.' 버튼 처리
     const display = document.getElementById('display');  
     const displayAll = document.getElementById('displayAll');  
     const lastValue = displayAll.value.slice(-1);      
 
-    if(isNaN(display.value)){  //NAN, ERROR 등 값 처리
+    if(isNaN(display.value)){  //NAN, ERROR 값 처리
         display.value = ''
         displayAll.value = ''
     }
   
-    if(!flag){
+    if(!flag){ 
         if(!isNaN(value)|| value ==="."){ //숫자이거나 . 이면
-            if (value === "." && display.value.includes(".")) {// 소수점이 이미 입력된 경우 추가 입력 방지                     
+            if (value === "." && display.value.includes(".")) { // 소수점이 이미 입력된 경우 추가 입력 방지                     
                 return;
             }
-            if (value === "." && display.value==="") {// 빈 셀에 . 입력시 0. 으로 변환                     
+            if (value === "." && display.value==="") {          // 빈 셀에 . 입력시 0. 으로 변환                     
                 value = "0.";
             }
-            if(display.value==="0" && value != "."){
+            if(display.value==="0" && value != "."){            // '0' 뒤에 숫자 입력 시 대체    
                 display.value = ''
-                display.value = value;   // '0' 뒤에 숫자 입력 시 대체      
-            }else if (/([+\-*/])/.test(lastValue)) { 
-                // 연산자 뒤에 숫자 입력 시 display 초기화 후 입력
+                display.value = value;    
+            }else if (/([+\-*/])/.test(lastValue)) {            // 연산자 뒤에 숫자 입력 시 display 초기화 후 입력
                 if(operator_clicked){
                     display.value='';
                     operator_clicked = false;
                 }
                 display.value += value; 
-                console.log("2");
-            } else {
-                // 숫자 연속 입력 처리
+            } else {                                            // 숫자 연속 입력 처리
                 display.value += value; 
-                console.log("3");
             }
-           // displayAll.value += value; // 전체 식에 입력 추가
         }
 
-    }else {//flag가 true 일 때, 다음 입력 값이 숫자이면 리셋/ 연산자이면 이전 결괏값에 이어서 계산       
-
-            displayAll.value = '';
-            display.value = value;
-            flag = false;
+    }else {//flag가 true 일 때, 리셋 후 새로운 계산
+        displayAll.value = '';
+        display.value = value;
+        flag = false;
     }
     operator_clicked = false; 
-    convertToOthers();   
-    
-      // 여기서 display 레이아웃 업데이트
-      updateDisplayLayout(display);
-      updateDisplayAllLayout(displayAll);
-
+    convertToOthers();                  //2,8,16 진법으로 바꾸기      
+    updateDisplayLayout(display);       //스크롤
+    updateDisplayAllLayout(displayAll); //스크롤
 }
       
 
-function operator(value){
+function operator(value){ //연산자 입력 처리
     const display = document.getElementById('display');  
     const displayAll = document.getElementById('displayAll');  
     const lastValue = displayAll.value.slice(-1);
 
-    if(display.value==="")return;
+    if(display.value==="" && displayAll.value===""){//공백 연산자 입력 X
+        return;
+    }
+
+
+    if(isNaN(display.value)){  //NAN, ERROR(문자결과값) 값 처리
+        display.value = ''
+        displayAll.value = ''
+        console.log("display : ", display.value )    
+        return;
+    }
   
-   
     if(!flag){
-        if(!operator_clicked){ // 연산자가 없다면
+        if(!operator_clicked){              // 연산자가 없다면
             displayAll.value += display.value+value;
             operator_clicked = true;
-            console.log("operator_clicked : ", operator_clicked)   
+            console.log("operator_clicked : ", operator_clicked)          
+        
         }else{
-            if(/([+\-*/])/.test(lastValue)) {//연산자 연 속 입력 시 연산자 바뀜
-                displayAll.value = displayAll.value.slice(0, -1) + value;
-            }else if(display.value !== ''){ //숫자가 아니고 display가 공백이 아니라면
-                displayAll.value += display.value +value; // 연산자 추가
-                //currentValue = displayAll.value
-                //displayAll.value = display.value + value;
-                //flag = false;
-                operator_clicked = true;
-                console.log("operator_clicked : ", operator_clicked)              
-            }else{
-                displayAll.value += value;        
-            }
+            displayAll.value = displayAll.value.slice(0, -1) + value;
+            // if(/([+\-*/])/.test(lastValue)) {//연산자 연속 입력 시 연산자 바뀜
+            // }
+            // else if(display.value !== ''){ //display가 공백이 아니라면
+            //     displayAll.value += display.value +value; // 연산자 추가
+            //     operator_clicked = true;
+            //     console.log("!!operator_clicked : ", operator_clicked)              
+            // }
+            // else{
+            //     displayAll.value += value;        
+            // }
         }
-    }else{
+    }else{ ////flag가 true 일 때, 이어서 계산
         displayAll.value = display.value + value;
-        operator_clicked = true;
-        console.log("operator_clicked!!!! : ", operator_clicked)  
+        operator_clicked = true; 
         flag = false; 
     }
     updateDisplayAllLayout(displayAll);
-
 }         
 
-function clearDisplay() {
+function clearDisplay() { //'C'
     document.getElementById('display').value = '';
     document.getElementById('displayAll').value = '';
 }
 
-function deleteDisplay() { //숫자라면 뒤에서 하나씩 지우기 (연산자에는 영향X)
+function deleteOne() { //숫자라면 뒤에서 하나씩 지우기 (연산자에는 영향X)
     const display = document.getElementById('display');     
     if(!isNaN(display.value.slice(-1))){
         display.value = display.value.slice(0, -1);
+    }
+    if(display.value===""){ //공백이되면 연산자 변경가능
+        operator_clicked = true; 
+        return;
     }
 
 }
@@ -157,42 +159,68 @@ function deletRecent() { //CE
 
 }
 
-function percent() {
-    //@@@@숫자각각 적용되게 변경하기
-    document.getElementById('display').value *= 0.01;
-}
-function pow() {
+function percent() {  //%
     const display = document.getElementById('display');
+
+    if(display.value==="")return;
+    if(isNaN(display.value)){  //NAN, ERROR(문자결과값) 값 처리
+        display.value = ''
+        displayAll.value = ''
+        return;
+    }
+    display.value *= 0.01;
+}
+
+function pow() {    //x²
+    const display = document.getElementById('display');
+
+    if(display.value==="")return;
+    if(isNaN(display.value)){  //NAN, ERROR(문자결과값) 값 처리
+        display.value = ''
+        displayAll.value = ''
+        return;
+    }
     display.value = Math.pow(display.value,2) // x의 제곱
 }
 
-function sqrt() {
+function sqrt() {    //루트
     const display = document.getElementById('display');
     const currentValue = parseFloat(display.value); // 현재 화면 값 가져오기 (숫자로 변환)
+    
+    if(display.value==="")return;
+    if(isNaN(display.value)){  //NAN, ERROR(문자결과값) 값 처리
+        display.value = ''
+        displayAll.value = ''
+        return;
+    }
 
-    if (currentValue < 0) {
-        display.value = "Error";  // 음수의 제곱근은 실수가 아님
+    if (currentValue < 0) { //음수의 제곱근은 실수가 아님 
+        display.value = "Error";  
     } else {
         display.value = Math.sqrt(currentValue); // 제곱근 계산
     }
 }
 
-function reciprocal(){
+function reciprocal(){ //¹/x 역수
     const display = document.getElementById('display');
     const displayAll = document.getElementById('displayAll');
-    display.value = 1/display.value  //역수
-    //displayAll.value = "1/(" + display.value + ")" //displayAll에는 1/(3)
-
-}
-
-function formatNumber(num) {
-    if (!isNaN(num)) {
-        return Number(num).toLocaleString(); // 숫자를 1,000 형식으로 변환
+    if(display.value==="")return;
+    if(isNaN(display.value)){  //NAN, ERROR(문자결과값) 값 처리
+        display.value = ''
+        displayAll.value = ''
+        return;
     }
-    return num; // 숫자가 아니면 그대로 반환
+    display.value = 1/display.value  //역수
 }
 
-function addToMemory(result) {
+// function formatNumber(num) {
+//     if (!isNaN(num)) {
+//         return Number(num).toLocaleString(); // 숫자를 1,000 형식으로 변환
+//     }
+//     return num; // 숫자가 아니면 그대로 반환
+// }
+
+function addToMemory(result) {  //결과값 메모리 list로 올리기
     const memoryList = document.getElementById('memory-list');
     const listItem = document.createElement('li');
     
@@ -205,8 +233,8 @@ function calculate() {
     const displayAll = document.getElementById('displayAll');
     const display = document.getElementById('display');
     const expression = displayAll.value+display.value;
-    //const formmatNumber = expression.toLocaleString
-    //const expression = document.getElementById('display').value;
+    
+    if(display.value==="")return;
 
     fetch('/calculate/', {
         method: 'POST',
@@ -221,7 +249,7 @@ function calculate() {
         if (data.result === "Error") {
             display.value = "Error"; // 오류 시 결과 표시
         } else {
-            display.value =  formatNumber(data.result); // 결과를 현재 화면에 표시
+            display.value =  data.result; // 결과를 현재 화면에 표시
             displayAll.value = data.expression + " = "; // 전체 계산식 업데이트
             memoryUpdate = displayAll.value + display.value 
             flag = true;
@@ -241,110 +269,51 @@ function calculate() {
 
 }
 
-// 2진법, 8진법, 16진법으로 변환하여 출력하는 함수
-    function convertToOthers() {
-        const display = document.getElementById('display');
-        const displayBin = document.getElementById('displayBin');
-        const displayOct = document.getElementById('displayOct');
-        const displayDec = document.getElementById('displayDec');
-        const displayHex = document.getElementById('displayHex');
-        // 문자 -> 숫자
-        const currentValue = parseFloat(display.value);
-        const binary = currentValue.toString(2); // 2진법
-        const octal = currentValue.toString(8);  // 8진법
-        const decimal = currentValue
-        const hexadecimal = currentValue.toString(16).toUpperCase(); // 16진법 (대문자)
+function convertToOthers() { // 2진법, 8진법, 16진법으로 변환하여 출력하는 함수
+    const display = document.getElementById('display');
+    const displayBin = document.getElementById('displayBin');
+    const displayOct = document.getElementById('displayOct');
+    const displayDec = document.getElementById('displayDec');
+    const displayHex = document.getElementById('displayHex');
+    const currentValue = parseFloat(display.value); // 부동소수점문자 -> 숫자
+    const binary = currentValue.toString(2);  // 2진법
+    const octal = currentValue.toString(8);   // 8진법
+    const decimal = currentValue              //10진법
+    const hexadecimal = currentValue.toString(16).toUpperCase(); // 16진법 (대문자)
 
-            displayBin.value = binary;
-            displayOct.value = octal;
-            displayDec.value = decimal;
-            displayHex.value = hexadecimal;
+    displayBin.value = binary;
+    displayOct.value = octal;
+    displayDec.value = decimal;
+    displayHex.value = hexadecimal;
+}
+
+document.getElementById('toggleBases').addEventListener('click', function () { //base show , hide button
+    const baseContainer = document.getElementById('baseContainer');
+    const toggleButton = document.getElementById('toggleBases');    
+
+    if (baseContainer.classList.contains('hidden')) {
+        baseContainer.classList.remove('hidden');
+        toggleButton.textContent = 'Hide';
+    } else {
+        baseContainer.classList.add('hidden');
+        toggleButton.textContent = 'Show';
+    }   
+});
+// 메모리 열기/닫기 토글
+document.getElementById('toggleMemory').addEventListener('click', function () {
+    toggleMemory();
+});
+        
+function toggleMemory(){   
+    const memorySidebar = document.getElementById('memorySidebar');
+    const toggleButton = document.getElementById('toggleMemory');
+
+    if (memorySidebar.classList.contains('hidden')) {
+        memorySidebar.classList.remove('hidden');
+        toggleButton.textContent = 'Hide Memory';
+
+    } else {
+        memorySidebar.classList.add('hidden');
+        toggleButton.textContent = 'Memory';
     }
-
-    document.getElementById('toggleBases').addEventListener('click', function () {
-        const baseContainer = document.getElementById('baseContainer');
-        const toggleButton = document.getElementById('toggleBases');
-        //const toggleButton = document.getElementById('toggleBases');
-        
-    
-        if (baseContainer.classList.contains('hidden')) {
-            baseContainer.classList.remove('hidden');
-            toggleButton.textContent = 'Hide';
-            baseContainer.style.maxHeight = `${baseContainer.offsetHeight}px`;
-            height = baseContainer.style.maxHeight
-            console.log("height : ", height);
-
-        } else {
-            baseContainer.classList.add('hidden');
-            toggleButton.textContent = 'Show';
-        }
-        
-    });
-
-
-
-        // 계산 결과를 메모리 영역에 추가하는 함수
-
-
-    // // 계산이 완료되었을 때 호출
-    // function calculateResult() {
-    //     const display = document.querySelector('.display');
-    //     const result = eval(display.value); // 결과 계산
-    //     display.value = result; // 디스플레이 업데이트
-    //     addToMemory(result); // 메모리에 추가
-    //     console.log("result@@@@@@ : ", result);
-
-    // }
-
-
-    // 버튼 클릭 이벤트 예제
-  //  document.querySelector('.equals-button').addEventListener('click', calculateResult);
-    // 메모리 열기/닫기 토글
-    document.getElementById('toggleMemory').addEventListener('click', function () {
-        toggleMemory();
-    });
-        
-        
-    function toggleMemory(){   
-        const memorySidebar = document.getElementById('memorySidebar');
-        
-        const toggleButton = document.getElementById('toggleMemory');
-
-        if (memorySidebar.classList.contains('hidden')) {
-            memorySidebar.classList.remove('hidden');
-           // memorySidebar.classList.add('visible');
-            toggleButton.textContent = 'Hide Memory';
-            // 메모리 높이를 계산기의 높이로 설정
-           // memorySidebar.style.maxHeight = `${calculator.offsetHeight}px`;
-
-        } else {
-           // memorySidebar.classList.remove('visible');
-            memorySidebar.classList.add('hidden');
-            //memorySidebar.style.maxHeight = '0'; // 높이를 0으로 설정
-            toggleButton.textContent = 'Memory';
-        }
-    }
-    // 창 크기 변경 시 메모리 높이 업데이트
-    window.addEventListener('resize', function () {
-        const memorySidebar = document.getElementById('memorySidebar');
-        const calculator = document.querySelector('.calculator');
-
-        // 메모리가 보이는 상태일 때만 높이 재설정
-        if (!memorySidebar.classList.contains('hidden')) {
-            memorySidebar.style.maxHeight = `${calculator.offsetHeight}px`;
-        }
-    });
-
-    // // 페이지 로드 시 초기화
-    // window.addEventListener('load', function () {
-    //     const memorySidebar = document.getElementById('memorySidebar');
-    //     const calculator = document.querySelector('.calculator');
-    //     memorySidebar.style.maxHeight = `${calculator.offsetHeight}px`;
-    // });
-
-    // // 창 크기 변경 시 높이 재설정
-    // window.addEventListener('resize', function () {
-    //     const memorySidebar = document.getElementById('memorySidebar');
-    //     const calculator = document.querySelector('.calculator');
-    //     memorySidebar.style.maxHeight = `${calculator.offsetHeight}px`;
-    // });
+}
