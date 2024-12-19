@@ -280,7 +280,7 @@ document.getElementById('toggleBases').addEventListener('click', function () { /
     } else {
         baseContainer.classList.add('hidden');
         memorySidebar.classList.remove('expanded');
-                toggleButton.textContent = 'Show';
+        toggleButton.textContent = 'Show';
     }   
 });
 

@@ -146,6 +146,7 @@
     color: #ffffffac;
     height: 0px; /* 숨길 때 높이 0으로 설정 */
     overflow: hidden; /* 숨긴 상태에서 스크롤 제거 */
+    border:none;
 }
 
 .memory-sidebar.expanded {
