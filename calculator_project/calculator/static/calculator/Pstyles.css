@@ -1,0 +1,129 @@
+.container {
+  display: flex; /*붙이기*/
+  justify-content: center; /*가로에서 위치*/
+  margin-top: 50px;
+  gap: 20px; /*사이 공간 추가*/
+}
+
+.calculator {
+  display: flex;
+  width: 300px;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.displayAll {
+  width: 100%;
+  height: 58px;
+  font-size: 20px;
+  font-family: "Courier New", Courier, monospace;
+  text-align: right;
+  padding: 15px 10px 15px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  box-sizing: border-box;
+  resize: none;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.display {
+  width: 100%;
+  height: 58px;
+  font-size: 20px;
+  font-family: "Courier New", Courier, monospace;
+  text-align: right;
+  padding: 15px 10px 15px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  box-sizing: border-box;
+  resize: none;
+  font-weight: bold;
+}
+
+.button-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  width: 300px;
+  margin: 10px;
+}
+
+.button {
+  width: 60px;
+  height: 60px;
+  margin: 2px;
+  font-size: 18px;
+  cursor: pointer;
+  background-color: #aad2b5b9;
+}
+
+.button:hover {
+  background-color: #7f783db6;
+}
+
+.row {
+  text-align: center;
+  width: 280px;
+  margin-bottom: 5px;
+}
+
+.show-button {
+  display: flex;
+  margin-bottom: 5px;
+  text-align: right;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+
+.hidden {
+  display: none;
+}
+
+.base-container {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  width: 240px;
+  text-align: left;
+  font-family: "Courier New", Courier, monospace;
+}
+
+.base-field {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.base-textarea {
+  width: 100%;
+  max-height: 200px;
+  text-align: right;
+  border: none;
+  padding-left: 10px;
+  line-height: 1.5;
+  resize: none;
+  font-size: 12px;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+}
+
+.toggle-button {
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: #dbe8afdd;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.toggle-button:hover {
+  background-color: #007bffdd;
+}

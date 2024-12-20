@@ -127,7 +127,7 @@
     flex-wrap: wrap;
     text-align: center; 
     width: 300px;
-    /* align-items: flex-start; */
+    align-content: flex-start;
     /* width: 200px; */
     background-color: #d2aad0b9;
     padding: 10px;

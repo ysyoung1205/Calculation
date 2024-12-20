@@ -1,5 +1,24 @@
 let flag = false;
 let operator_clicked = false;
+// 전역 변수로 현재 모드의 최소/최대값 설정
+let currentModeLimits = { min: -32768, max: 65535 }; // 초기값: WORD
+
+// 옵션 변경 시 호출되는 함수
+document.getElementById("modeSelector").addEventListener("change", function () {
+  const selectedMode = this.value;
+
+  // 모드에 따른 제한 값 변경
+  const MODES = {
+    WORD: { min: -32768, max: 32767 },
+    DWORD: { min: -2147483648, max: 2147483647 },
+    QWORD: { min: -9223372036854775808, max: 9223372036854775807 },
+  };
+
+  currentModeLimits = MODES[selectedMode];
+  alert(
+    `Changed to ${selectedMode} mode. Allowed range: ${currentModeLimits.min} ~ ${currentModeLimits.max}`
+  );
+});
 
 //키보드 입력 시
 document.addEventListener("keydown", function (event) {
@@ -85,6 +104,22 @@ function append(value) {
     display.value = value;
     flag = false;
   }
+
+  // 입력값 제한 처리
+  const numericValue = parseFloat(display.value);
+  if (
+    numericValue < currentModeLimits.min ||
+    numericValue > currentModeLimits.max
+  ) {
+    alert(
+      `Value out of range! Allowed range: ${currentModeLimits.min} ~ ${currentModeLimits.max}`
+    );
+    // display.value = ""; // 범위를 초과하면 초기화 >> 입력제한
+    // 입력값을 제한 범위에 맞추기
+    display.value = display.value.slice(0, -1); // 마지막 입력값 제거
+    return; // 더 이상 처리하지 않음
+  }
+
   operator_clicked = false;
   convertToOthers(); //2,8,16 진법으로 바꾸기
   updateDisplayLayout(display); //스크롤
@@ -227,15 +262,6 @@ function reciprocal() {
   display.value = 1 / display.value; //역수
 }
 
-function addToMemory(result) {
-  //결과값 메모리 list로 올리기
-  const memoryList = document.getElementById("memory-list");
-  const listItem = document.createElement("li");
-
-  listItem.textContent = result;
-  memoryList.appendChild(listItem);
-}
-
 function calculate() {
   const displayAll = document.getElementById("displayAll");
   const display = document.getElementById("display");
@@ -266,7 +292,9 @@ function calculate() {
         setTimeout(() => {
           updateDisplayAllLayout(displayAll);
         }, 0);
-        addToMemory(memoryUpdate); // 결과를 메모리에 추가
+
+        console.log(typeof data.result);
+        console.log(data.result);
       }
     })
     .catch((error) => {
@@ -282,47 +310,38 @@ function convertToOthers() {
   const displayDec = document.getElementById("displayDec");
   const displayHex = document.getElementById("displayHex");
   const currentValue = parseFloat(display.value); // 부동소수점문자 -> 숫자
-  const binary = currentValue.toString(2); // 2진법
-  const octal = currentValue.toString(8); // 8진법
-  const decimal = currentValue; //10진법
-  const hexadecimal = currentValue.toString(16).toUpperCase(); // 16진법 (대문자)
+  let binary = currentValue.toString(2); // 2진법
 
-  displayBin.value = binary;
-  displayOct.value = octal;
+  let octal = currentValue.toString(8); // 8진법
+  let decimal = currentValue.toString(); //10진법
+  let hexadecimal = currentValue.toString(16).toUpperCase(); // 16진법 (대문자)
+
+  // 2진수: 4자리 패딩 + 4비트 그룹화
+  binary = binary.padStart(Math.ceil(binary.length / 4) * 4, "0"); // 4자리 배수로 패딩
+  console.log(binary);
+  binary = binary.match(/.{1,4}/g).join(" "); // 4개씩 나누고 공백 추가
+  octal = octal.replace(/\B(?=(\d{3})+(?!\d))/g, " "); // 뒤에서부터 3자리마다 공백 추가
+  decimal = decimal.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  hexadecimal = hexadecimal.replace(/\B(?=(\w{4})+(?!\w))/g, " "); // 뒤에서부터 3자리마다 공백 추가
+
+  displayBin.value = "0b" + binary;
+  displayOct.value = "0o" + octal;
   displayDec.value = decimal;
-  displayHex.value = hexadecimal;
+  displayHex.value = "0x" + hexadecimal;
 }
 
 document.getElementById("toggleBases").addEventListener("click", function () {
   //base show , hide button
   const baseContainer = document.getElementById("baseContainer");
   const toggleButton = document.getElementById("toggleBases");
-  const memorySidebar = document.getElementById("memorySidebar");
 
   if (baseContainer.classList.contains("hidden")) {
     baseContainer.classList.remove("hidden");
-    memorySidebar.classList.add("expanded");
+
     toggleButton.textContent = "Hide";
   } else {
     baseContainer.classList.add("hidden");
-    memorySidebar.classList.remove("expanded");
+
     toggleButton.textContent = "Show";
   }
 });
-
-// 메모리 열기/닫기 토글
-document.getElementById("toggleMemory").addEventListener("click", function () {
-  toggleMemory();
-});
-function toggleMemory() {
-  const memorySidebar = document.getElementById("memorySidebar");
-  const toggleButton = document.getElementById("toggleMemory");
-
-  if (memorySidebar.classList.contains("hidden")) {
-    memorySidebar.classList.remove("hidden");
-    toggleButton.textContent = "Hide Memory";
-  } else {
-    memorySidebar.classList.add("hidden");
-    toggleButton.textContent = "Memory";
-  }
-}

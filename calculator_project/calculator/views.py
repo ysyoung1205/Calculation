@@ -19,3 +19,6 @@ def calculate(request):
         return JsonResponse({'expression': expression,'result': result})  
     return JsonResponse({'result': 'Invalid request'})
 
+def programmers_calculator(request):
+    return render(request, 'calculator/Programmers_Calculator.html')
+
