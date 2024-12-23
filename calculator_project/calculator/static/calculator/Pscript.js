@@ -1,7 +1,7 @@
 let flag = false;
 let operator_clicked = false;
 // 전역 변수로 현재 모드의 최소/최대값 설정
-let currentModeLimits = { min: -32768, max: 65535 }; // 초기값: WORD
+let currentModeLimits = { min: BigInt(-32768), max: BigInt(32767) }; // 초기값: WORD
 
 // 옵션 변경 시 호출되는 함수
 document.getElementById("modeSelector").addEventListener("change", function () {
@@ -9,9 +9,12 @@ document.getElementById("modeSelector").addEventListener("change", function () {
 
   // 모드에 따른 제한 값 변경
   const MODES = {
-    WORD: { min: -32768, max: 32767 },
-    DWORD: { min: -2147483648, max: 2147483647 },
-    QWORD: { min: -9223372036854775808, max: 9223372036854775807 },
+    WORD: { min: BigInt(-32768), max: BigInt(32767) },
+    DWORD: { min: BigInt(-2147483648), max: BigInt(2147483647) },
+    QWORD: {
+      min: BigInt(-9223372036854775808),
+      max: BigInt(9223372036854775807),
+    },
   };
 
   currentModeLimits = MODES[selectedMode];
@@ -36,7 +39,7 @@ document.addEventListener("keydown", function (event) {
     event.preventDefault();
   } else if (event.key === "Enter") {
     //엔터
-    calculate();
+    Pcalculate();
     event.preventDefault();
   } else if (event.key === "Backspace") {
     //백스페이스
@@ -147,10 +150,12 @@ function operator(value) {
 
   if (!flag) {
     if (!operator_clicked) {
+      let result = BigInt(display.value);
       // 연산자가 없다면
-      displayAll.value += display.value + value;
+      displayAll.value += result + value;
       operator_clicked = true;
       console.log("operator_clicked : ", operator_clicked);
+      console.log(typeof result);
     } else {
       displayAll.value = displayAll.value.slice(0, -1) + value;
     }
@@ -182,22 +187,22 @@ function deleteOne() {
   }
 }
 
-function deletRecent() {
-  //CE
-  const display = document.getElementById("display");
-  const currentValue = display.value;
-  // 연산자를 기준으로 계산식 나누기
-  const parts = currentValue.split(/([+\-*/])/); // 연산자 포함 분리
+// function deletRecent() {
+//   //CE
+//   const display = document.getElementById("display");
+//   const currentValue = display.value;
+//   // 연산자를 기준으로 계산식 나누기
+//   const parts = currentValue.split(/([+\-*/])/); // 연산자 포함 분리
 
-  // 마지막 숫자 또는 연산자 제거
-  if (parts.length > 1) {
-    parts.pop(); // 배열의 마지막 항목 제거
-    display.value = parts.join(""); // 나머지 값 다시 합침
-  } else {
-    display.value = ""; // 숫자 하나만 있을 경우 전체 삭제
-    //displayAll.value = '';
-  }
-}
+//   // 마지막 숫자 또는 연산자 제거
+//   if (parts.length > 1) {
+//     parts.pop(); // 배열의 마지막 항목 제거
+//     display.value = parts.join(""); // 나머지 값 다시 합침
+//   } else {
+//     display.value = ""; // 숫자 하나만 있을 경우 전체 삭제
+//     //displayAll.value = '';
+//   }
+// }
 
 function percent() {
   //%
@@ -213,63 +218,20 @@ function percent() {
   display.value *= 0.01;
 }
 
-function pow() {
-  //x²
-  const display = document.getElementById("display");
-
-  if (display.value === "") return;
-  if (isNaN(display.value)) {
-    //NAN, ERROR(문자결과값) 값 처리
-    display.value = "";
-    displayAll.value = "";
-    return;
-  }
-  display.value = Math.pow(display.value, 2); // x의 제곱
-}
-
-function sqrt() {
-  //루트
-  const display = document.getElementById("display");
-  const currentValue = parseFloat(display.value); // 현재 화면 값 가져오기 (숫자로 변환)
-
-  if (display.value === "") return;
-  if (isNaN(display.value)) {
-    //NAN, ERROR(문자결과값) 값 처리
-    display.value = "";
-    displayAll.value = "";
-    return;
-  }
-
-  if (currentValue < 0) {
-    //음수의 제곱근은 실수가 아님
-    display.value = "Error";
-  } else {
-    display.value = Math.sqrt(currentValue); // 제곱근 계산
-  }
-}
-
-function reciprocal() {
-  //¹/x 역수
-  const display = document.getElementById("display");
-  const displayAll = document.getElementById("displayAll");
-  if (display.value === "") return;
-  if (isNaN(display.value)) {
-    //NAN, ERROR(문자결과값) 값 처리
-    display.value = "";
-    displayAll.value = "";
-    return;
-  }
-  display.value = 1 / display.value; //역수
-}
-
-function calculate() {
+function Pcalculate() {
   const displayAll = document.getElementById("displayAll");
   const display = document.getElementById("display");
-  const expression = displayAll.value + display.value;
+
+  let results = BigInt(display.value);
+  console.log("Results (BigInt):", results);
+  console.log(typeof results);
+
+  const expression = displayAll.value + results;
+  console.log(expression);
 
   if (display.value === "") return;
 
-  fetch("/calculate/", {
+  fetch("/Pcalculate/", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -280,25 +242,26 @@ function calculate() {
     .then((response) => response.json())
     .then((data) => {
       if (data.result === "Error") {
+        console.log("Server response:", data);
         display.value = "Error"; // 오류 시 결과 표시
       } else {
-        display.value = data.result; // 결과를 현재 화면에 표시
+        const result = BigInt(data.result);
+        display.value = result;
+        //displayAll.value = `${expression} = `; // 전체 수식 업데이트
         displayAll.value = data.expression + " = "; // 전체 계산식 업데이트
-        memoryUpdate = displayAll.value + display.value;
-        flag = true;
-        console.log("flag: ", flag);
-        convertToOthers();
-        // DOM 업데이트 이후 호출
-        setTimeout(() => {
-          updateDisplayAllLayout(displayAll);
-        }, 0);
-
-        console.log(typeof data.result);
-        console.log(data.result);
+        console.log(typeof result);
       }
+      // memoryUpdate = displayAll.value + display.value;
+      flag = true;
+      console.log("flag: ", flag);
+      convertToOthers();
+      // DOM 업데이트 이후 호출
+      setTimeout(() => {
+        updateDisplayAllLayout(displayAll);
+      }, 0);
     })
     .catch((error) => {
-      document.getElementById("display").value = "Error";
+      document.getElementById("display").value = "Error!!";
     });
 }
 
