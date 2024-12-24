@@ -150,7 +150,7 @@ function operator(value) {
 
   if (!flag) {
     if (!operator_clicked) {
-      let result = BigInt(display.value);
+      let result = BigInt(display.value); //////////////////////////////////////////////////////bigint로 변경
       // 연산자가 없다면
       displayAll.value += result + value;
       operator_clicked = true;
@@ -187,22 +187,8 @@ function deleteOne() {
   }
 }
 
-// function deletRecent() {
-//   //CE
-//   const display = document.getElementById("display");
-//   const currentValue = display.value;
-//   // 연산자를 기준으로 계산식 나누기
-//   const parts = currentValue.split(/([+\-*/])/); // 연산자 포함 분리
-
-//   // 마지막 숫자 또는 연산자 제거
-//   if (parts.length > 1) {
-//     parts.pop(); // 배열의 마지막 항목 제거
-//     display.value = parts.join(""); // 나머지 값 다시 합침
-//   } else {
-//     display.value = ""; // 숫자 하나만 있을 경우 전체 삭제
-//     //displayAll.value = '';
-//   }
-// }
+function ror() {} //RSH
+function rol() {} //LSH/////////////////////////////////////////////////////////////////////////////////////////
 
 function percent() {
   //%
@@ -245,11 +231,32 @@ function Pcalculate() {
         console.log("Server response:", data);
         display.value = "Error"; // 오류 시 결과 표시
       } else {
-        const result = BigInt(data.result);
+        let result = BigInt(data.result); // 서버에서 계산된 결과
+
+        // === 오버플로우 연산 ===
+        const bitSize = BigInt(
+          currentModeLimits.max - currentModeLimits.min + 1n
+        );
+        if (result < currentModeLimits.min || result > currentModeLimits.max) {
+          // 범위를 벗어나면 결과를 모드에 맞게 순환
+          result = (result + bitSize) % bitSize; // 음수도 포함한 순환 처리
+
+          // 음수 처리 (음수일 때 2의 보수로 변환)
+          if (result > currentModeLimits.max) {
+            result -= bitSize; // 음수 영역으로 이동
+          }
+
+          alert(`Overflow occurred! Adjusted result: ${result}`);
+        }
+
+        // === 결과 반영 ===
         display.value = result;
-        //displayAll.value = `${expression} = `; // 전체 수식 업데이트
         displayAll.value = data.expression + " = "; // 전체 계산식 업데이트
-        console.log(typeof result);
+        // const result = BigInt(data.result);
+        // display.value = result;
+        // //displayAll.value = `${expression} = `; // 전체 수식 업데이트
+        // displayAll.value = data.expression + " = "; // 전체 계산식 업데이트
+        // console.log(typeof result);
       }
       // memoryUpdate = displayAll.value + display.value;
       flag = true;

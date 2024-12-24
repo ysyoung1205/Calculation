@@ -24,9 +24,7 @@ def Pcalculate(request):
     if request.method == 'POST':
         expression = request.POST.get('expression', '')  #입력된 수식
         try:
-            result = sympify(expression)  # sympy 수식 안전하게 평가
-            # result = str(result)  # 결과를 기본 타입으로 변환
-            #result = eval(expression)  # 보안 문제 주의
+            result = sympify(expression) 
             return JsonResponse({'expression': expression, 'result': str(result)})  # JsonResponse로 결과 반환:
         except Exception:
             result = "Error"
