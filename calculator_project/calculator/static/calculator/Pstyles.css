@@ -72,8 +72,9 @@
 }
 
 .show-button {
+  margin: 10px 0;
   display: flex;
-  margin-bottom: 5px;
+  align-items: center; /* 세로축 중앙 정렬 */
   text-align: right;
   justify-content: space-between;
   gap: 10px;
@@ -85,7 +86,6 @@
 }
 
 .base-container {
-  width: 100%;
   margin-top: 10px;
   padding: 10px;
   border: none;
@@ -115,15 +115,90 @@
 }
 
 .toggle-button {
-  margin-top: 10px;
+  /* margin-top: 10px; */
   padding: 5px 10px;
   background-color: #dbe8afdd;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-size: 14px; /* 글자 크기 */
+  text-align: center;
+  height: 40px; /* 버튼 높이 */
+  box-sizing: border-box; /* 패딩 포함 크기 계산 */
 }
 
 .toggle-button:hover {
   background-color: #007bffdd;
+}
+
+.option-button {
+  width: 120px; /* Select 박스 너비 */
+  height: 40px; /* Select 박스 높이 */
+  text-align: center; /* 텍스트 중앙 정렬 */
+  border: 1px solid #ccc; /* 테두리 설정 */
+  border-radius: 5px; /* 모서리를 둥글게 */
+  padding: 5px; /* 안쪽 여백 */
+  font-size: 14px; /* 글자 크기 */
+  box-sizing: border-box; /* 패딩 포함 크기 계산 */
+}
+
+/* Memory */
+.memory-sidebar {
+  display: flex;
+  flex-wrap: wrap;
+  text-align: center;
+  width: 300px;
+  align-content: flex-start;
+  /* width: 200px; */
+  background-color: #aad2b5b9;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-family: "Courier New", Courier, monospace;
+  text-align: left;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 653px;
+  transition: max-height 0.3s ease; /* 높이 변경 애니메이션 */
+}
+
+.memory-sidebar.hidden {
+  background-color: #ffffffac;
+  color: #ffffffac;
+  height: 0px; /* 숨길 때 높이 0으로 설정 */
+  overflow: hidden; /* 숨긴 상태에서 스크롤 제거 */
+  border: none;
+}
+
+.memory-sidebar.expanded {
+  height: 770px; /* 확장된 높이 */
+  overflow-y: auto; /* 스크롤 활성화 */
+}
+
+.memory-sidebar h3 {
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  width: 100%;
+  height: 30px;
+}
+
+#memory-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 100%;
+  width: 100%;
+}
+
+#memory-list li {
+  margin-bottom: 5px;
+  padding: 5px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  font-size: 14px;
+  word-wrap: break-word;
 }

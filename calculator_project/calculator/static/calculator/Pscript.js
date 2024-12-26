@@ -1,7 +1,11 @@
 let flag = false;
 let operator_clicked = false;
 // 전역 변수로 현재 모드의 최소/최대값 설정
-let currentModeLimits = { min: BigInt(-32768), max: BigInt(32767) }; // 초기값: WORD
+let currentModeLimits = {
+  min: BigInt(-32768),
+  max: BigInt(32767),
+  bitSize: 16,
+}; // 초기값: WORD
 
 // 옵션 변경 시 호출되는 함수
 document.getElementById("modeSelector").addEventListener("change", function () {
@@ -9,17 +13,19 @@ document.getElementById("modeSelector").addEventListener("change", function () {
 
   // 모드에 따른 제한 값 변경
   const MODES = {
-    WORD: { min: BigInt(-32768), max: BigInt(32767) },
-    DWORD: { min: BigInt(-2147483648), max: BigInt(2147483647) },
+    WORD: { min: BigInt(-32768), max: BigInt(32767), bitSize: 16 },
+    DWORD: { min: BigInt(-2147483648), max: BigInt(2147483647), bitSize: 32 },
     QWORD: {
       min: BigInt(-9223372036854775808),
       max: BigInt(9223372036854775807),
+      bitSize: 64,
     },
   };
 
   currentModeLimits = MODES[selectedMode];
+  bitSize = currentModeLimits.bitSize;
   alert(
-    `Changed to ${selectedMode} mode. Allowed range: ${currentModeLimits.min} ~ ${currentModeLimits.max}`
+    `Changed to ${selectedMode} mode. Allowed range: ${currentModeLimits.min} ~ ${currentModeLimits.max}, Bit size: ${bitSize}`
   );
 });
 
@@ -75,31 +81,34 @@ function append(value) {
   }
 
   if (!flag) {
-    if (!isNaN(value) || value === ".") {
-      //숫자이거나 . 이면
-      if (value === "." && display.value.includes(".")) {
-        // 소수점이 이미 입력된 경우 추가 입력 방지
-        return;
-      }
-      if (value === "." && display.value === "") {
-        // 빈 셀에 . 입력시 0. 으로 변환
-        value = "0.";
-      }
-      if (display.value === "0" && value != ".") {
-        // '0' 뒤에 숫자 입력 시 대체
+    //숫자이거나 . 이면
+    // if (value === "." && display.value.includes(".")) {
+    //   // 소수점이 이미 입력된 경우 추가 입력 방지
+    //   return;
+    // }
+    // if (value === "." && display.value === "") {
+    //   // 빈 셀에 . 입력시 0. 으로 변환
+    //   value = "0.";
+    // }
+    if (lastValue === ")") {
+      displayAll.value = "";
+      display.value = value;
+      return;
+    }
+    if (display.value === "0") {
+      // '0' 뒤에 숫자 입력 시 대체
+      display.value = "";
+      display.value = value;
+    } else if (/([+\-*//%<<>>)(])/.test(lastValue)) {
+      // 연산자 뒤에 숫자 입력 시 display 초기화 후 입력
+      if (operator_clicked) {
         display.value = "";
-        display.value = value;
-      } else if (/([+\-*/])/.test(lastValue)) {
-        // 연산자 뒤에 숫자 입력 시 display 초기화 후 입력
-        if (operator_clicked) {
-          display.value = "";
-          operator_clicked = false;
-        }
-        display.value += value;
-      } else {
-        // 숫자 연속 입력 처리
-        display.value += value;
+        operator_clicked = false; //////////???????
       }
+      display.value += value;
+    } else {
+      // 숫자 연속 입력 처리
+      display.value += value;
     }
   } else {
     //flag가 true 일 때, 리셋 후 새로운 계산
@@ -150,8 +159,14 @@ function operator(value) {
 
   if (!flag) {
     if (!operator_clicked) {
-      let result = BigInt(display.value); //////////////////////////////////////////////////////bigint로 변경
       // 연산자가 없다면
+      let result = BigInt(display.value); //////////////////////////////////////////////////////bigint로 변경
+
+      if (lastValue === ")") {
+        displayAll.value += value;
+        operator_clicked = true;
+        return;
+      }
       displayAll.value += result + value;
       operator_clicked = true;
       console.log("operator_clicked : ", operator_clicked);
@@ -187,35 +202,80 @@ function deleteOne() {
   }
 }
 
-function ror() {} //RSH
-function rol() {} //LSH/////////////////////////////////////////////////////////////////////////////////////////
-
-function percent() {
-  //%
+function parentheses(value) {
   const display = document.getElementById("display");
+  const displayAll = document.getElementById("displayAll");
+  const lastValue = displayAll.value.slice(-1) || "";
 
-  if (display.value === "") return;
-  if (isNaN(display.value)) {
-    //NAN, ERROR(문자결과값) 값 처리
-    display.value = "";
+  if (flag) {
     displayAll.value = "";
+    display.value = "";
+
+    displayAll.value += value;
+
+    flag = false;
     return;
   }
-  display.value *= 0.01;
+
+  // 여는 괄호 처리
+  if (value === "(") {
+    console.log("lastvalue: ", lastValue);
+    if (operator_clicked || display.value === "") {
+      displayAll.value += value;
+    } else {
+      displayAll.value += display.value + "*(";
+      display.value = "";
+    }
+
+    // if (!isNaN(display.value) || lastValue === ")") {
+    //   console.log("lastvalue: ", lastValue.length);
+
+    //   value = display.value + "*(";
+    // }
+    // displayAll.value += value;
+
+    return;
+  }
+
+  // 닫는 괄호 처리
+  if (value === ")") {
+    //displayvalue가 안 비어 있을 때
+    const openCount = (displayAll.value.match(/\(/g) || []).length; // 여는 괄호 개수
+    const closeCount = (displayAll.value.match(/\)/g) || []).length; // 닫는 괄호 개수
+
+    if (openCount <= closeCount) {
+      // 여는 괄호보다 닫는 괄호가 많으면 추가할 수 없음
+      alert("No matching '(' for this ')'.");
+      return;
+    }
+
+    // if (!operator_clicked) {
+    //diplay에 숫자가 입력되었을 때
+    displayAll.value += display.value + value;
+    display.value = "";
+    //return;
+    //}
+    // flag = true;
+    // console.log(flag);
+  }
 }
+
+function RSH() {} //RSH: 비트이동, ROR 순환이동
 
 function Pcalculate() {
   const displayAll = document.getElementById("displayAll");
   const display = document.getElementById("display");
 
-  let results = BigInt(display.value);
+  // `display.value`가 비어 있으면 `results`를 추가하지 않음
+  let results = display.value ? BigInt(display.value) : "";
   console.log("Results (BigInt):", results);
-  console.log(typeof results);
 
-  const expression = displayAll.value + results;
-  console.log(expression);
+  const expression = display.value
+    ? displayAll.value + results // `display.value`가 있으면 추가
+    : displayAll.value; // 없으면 `displayAll.value`만 사용
 
-  if (display.value === "") return;
+  console.log("Expression:", expression);
+  if (display.value === "" && displayAll.value === "") return;
 
   fetch("/Pcalculate/", {
     method: "POST",
@@ -252,13 +312,8 @@ function Pcalculate() {
         // === 결과 반영 ===
         display.value = result;
         displayAll.value = data.expression + " = "; // 전체 계산식 업데이트
-        // const result = BigInt(data.result);
-        // display.value = result;
-        // //displayAll.value = `${expression} = `; // 전체 수식 업데이트
-        // displayAll.value = data.expression + " = "; // 전체 계산식 업데이트
-        // console.log(typeof result);
       }
-      // memoryUpdate = displayAll.value + display.value;
+      memoryUpdate = displayAll.value + display.value;
       flag = true;
       console.log("flag: ", flag);
       convertToOthers();
@@ -266,10 +321,22 @@ function Pcalculate() {
       setTimeout(() => {
         updateDisplayAllLayout(displayAll);
       }, 0);
+      addToMemory(memoryUpdate); // 결과를 메모리에 추가
     })
     .catch((error) => {
       document.getElementById("display").value = "Error!!";
     });
+}
+
+function toTwosComplement(value, bitSize) {
+  if (value >= 0) {
+    console.log("toTwosComplement", value);
+    return value.toString(2).padStart(bitSize, "0"); // 양수는 그대로
+  }
+
+  const maxValue = BigInt(2 ** bitSize); // 최대값 계산
+  console.log("toTwosComplement", maxValue);
+  return (maxValue + value).toString(2).padStart(bitSize, "0"); // 2의 보수 계산
 }
 
 function convertToOthers() {
@@ -279,19 +346,48 @@ function convertToOthers() {
   const displayOct = document.getElementById("displayOct");
   const displayDec = document.getElementById("displayDec");
   const displayHex = document.getElementById("displayHex");
-  const currentValue = parseFloat(display.value); // 부동소수점문자 -> 숫자
-  let binary = currentValue.toString(2); // 2진법
 
-  let octal = currentValue.toString(8); // 8진법
-  let decimal = currentValue.toString(); //10진법
-  let hexadecimal = currentValue.toString(16).toUpperCase(); // 16진법 (대문자)
+  const currentValue = BigInt(display.value); // 현재 값
+  const bitSize = currentModeLimits.bitSize; // 현재 모드의 비트 크기
+
+  let binary, octal, decimal, hexadecimal;
+
+  if (currentValue >= 0) {
+    // 양수 처리
+    binary = currentValue.toString(2).padStart(bitSize, "0");
+    octal = currentValue.toString(8);
+    hexadecimal = currentValue.toString(16).toUpperCase();
+    console.log("bitSize", bitSize);
+  } else {
+    // 음수 처리: 2의 보수 계산
+    binary = toTwosComplement(currentValue, bitSize);
+    octal = BigInt("0b" + binary).toString(8);
+
+    hexadecimal = BigInt("0b" + binary)
+      .toString(16)
+      .toUpperCase();
+  }
+  decimal = currentValue.toString();
+
+  // 결과 업데이트
+  // displayBin.value = "0b" + binary;
+  // displayOct.value = "0o" + octal;
+  // displayDec.value = decimal;
+  // displayHex.value = "0x" + hexadecimal;
+
+  // let binary = currentValue.toString(2); // 2진법
+  // let octal = currentValue.toString(8); // 8진법
+  // let decimal = currentValue.toString(); //10진법
+  // let hexadecimal = currentValue.toString(16).toUpperCase(); // 16진법 (대문자)
 
   // 2진수: 4자리 패딩 + 4비트 그룹화
   binary = binary.padStart(Math.ceil(binary.length / 4) * 4, "0"); // 4자리 배수로 패딩
   console.log(binary);
   binary = binary.match(/.{1,4}/g).join(" "); // 4개씩 나누고 공백 추가
   octal = octal.replace(/\B(?=(\d{3})+(?!\d))/g, " "); // 뒤에서부터 3자리마다 공백 추가
+
   decimal = decimal.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
   hexadecimal = hexadecimal.replace(/\B(?=(\w{4})+(?!\w))/g, " "); // 뒤에서부터 3자리마다 공백 추가
 
   displayBin.value = "0b" + binary;
@@ -315,3 +411,28 @@ document.getElementById("toggleBases").addEventListener("click", function () {
     toggleButton.textContent = "Show";
   }
 });
+
+function addToMemory(result) {
+  //결과값 메모리 list로 올리기
+  const memoryList = document.getElementById("memory-list");
+  const listItem = document.createElement("li");
+
+  listItem.textContent = result;
+  memoryList.appendChild(listItem);
+}
+// 메모리 열기/닫기 토글
+document.getElementById("toggleMemory").addEventListener("click", function () {
+  toggleMemory();
+});
+function toggleMemory() {
+  const memorySidebar = document.getElementById("memorySidebar");
+  const toggleButton = document.getElementById("toggleMemory");
+
+  if (memorySidebar.classList.contains("hidden")) {
+    memorySidebar.classList.remove("hidden");
+    toggleButton.textContent = "Hide";
+  } else {
+    memorySidebar.classList.add("hidden");
+    toggleButton.textContent = "Memory";
+  }
+}

@@ -6,18 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Programmer's Calculator</title>
     <link rel="stylesheet" href="{% static 'calculator/Pstyles.css' %}" />
+    <link rel="stylesheet" href="{% static 'calculator/All.css' %}" />
   </head>
   <body>
+    {% include "header.html" %}
     <div class="container">
       <div id="calculate" class="calculator">
         <div class="show-button">
           <button id="toggleBases" class="toggle-button">Show</button>
-          <select id="modeSelector">
+          <select id="modeSelector" class="option-button">
             <option value="WORD">WORD</option>
             <option value="DWORD">DWORD</option>
-            <option value="QWORD">QWORD</option>    
+            <option value="QWORD">QWORD</option>
           </select>
- 
+          <button id="toggleMemory" class="toggle-button">Memory</button>
         </div>
         <div class="text_display">
           <textarea id="displayAll" class="displayAll"></textarea>
@@ -27,36 +29,52 @@
           <div>
             <div class="base-field">
               <label>HEX</label>
-              <textarea class="base-textarea" id="displayHex" readonly></textarea>
+              <textarea
+                class="base-textarea"
+                id="displayHex"
+                readonly
+              ></textarea>
             </div>
             <div class="base-field">
               <label>DEC</label>
-              <textarea class="base-textarea" id="displayDec" readonly></textarea>
+              <textarea
+                class="base-textarea"
+                id="displayDec"
+                readonly
+              ></textarea>
             </div>
             <div class="base-field">
               <label>OCT</label>
-              <textarea class="base-textarea" id="displayOct" readonly></textarea>
+              <textarea
+                class="base-textarea"
+                id="displayOct"
+                readonly
+              ></textarea>
             </div>
             <div class="base-field">
               <label>BIN</label>
-              <textarea class="base-textarea" id="displayBin" readonly></textarea>
+              <textarea
+                class="base-textarea"
+                id="displayBin"
+                readonly
+              ></textarea>
             </div>
           </div>
         </div>
 
         <div class="button-container">
           <div class="row">
-            <button class="button" onclick=""><<</button>
-            <button class="button" onclick="">>></button>
+            <button class="button" onclick="operator('<<')"><<</button>
+            <button class="button" onclick="operator('>>')">>></button>
             <button class="button" onclick="clearDisplay()">C</button>
             <button class="button" onclick="deleteOne()">←</button>
           </div>
 
           <div class="row">
-            <button class="button" onclick="">(</button>
-            <button class="button" onclick="">)</button>
-            <button class="button" onclick="">%</button>
-            <button class="button" onclick="operator('/')">/</button>
+            <button class="button" onclick="parentheses('(')">(</button>
+            <button class="button" onclick="parentheses(')')">)</button>
+            <button class="button" onclick="operator('%')">%</button>
+            <button class="button" onclick="operator('//')">//</button>
           </div>
           <div class="row">
             <button class="button" onclick="append('7')">7</button>
@@ -85,11 +103,19 @@
         </div>
       </div>
 
-
+      <!--Memory-->
+      <div id="memorySidebar" class="memory-sidebar hidden">
+        <h3>Memory</h3>
+        <ul id="memory-list">
+          <!--계산 결과-->
+        </ul>
+      </div>
+    </div>
     {% csrf_token %}
     <script>
       const csrfToken = "{{ csrf_token }}";
     </script>
     <script src="{% static 'calculator/Pscript.js' %}"></script>
+    <script src="{% static 'calculator/All.js' %}"></script>
   </body>
 </html>

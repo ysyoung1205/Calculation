@@ -326,3 +326,41 @@ function toggleMemory() {
     toggleButton.textContent = "Memory";
   }
 }
+
+// // 메뉴바에서 모드 전환
+// const standardMode = document.getElementById("standardMode");
+// const programmerMode = document.getElementById("programmerMode");
+
+// standardMode.addEventListener("click", (e) => {
+//   e.preventDefault();
+//   standardMode.classList.add("active");
+//   programmerMode.classList.remove("active");
+//   console.log("표준 계산기 활성화");
+//   // 표준 계산기 로직 추가
+// });
+
+// programmerMode.addEventListener("click", (e) => {
+//   e.preventDefault();
+//   programmerMode.classList.add("active");
+//   standardMode.classList.remove("active");
+//   console.log("프로그래밍 계산기 활성화");
+//   // 프로그래밍 계산기 로직 추가
+// });
+
+// 메뉴 요소 가져오기
+const standardMode = document.getElementById("standardMode");
+const programmerMode = document.getElementById("programmerMode");
+
+// 표준 계산기 클릭
+standardMode.addEventListener("click", (e) => {
+  e.preventDefault(); // 기본 링크 동작 방지
+  const currentUrl = window.location.origin; // 현재 도메인 (http://127.0.0.1:8000)
+  window.location.href = `${currentUrl}/`; // 표준 계산기로 이동
+});
+
+// 프로그래밍 계산기 클릭
+programmerMode.addEventListener("click", (e) => {
+  e.preventDefault(); // 기본 링크 동작 방지
+  const currentUrl = window.location.origin; // 현재 도메인 (http://127.0.0.1:8000)
+  window.location.href = `${currentUrl}/programmers_calculator/`; // 프로그래밍 계산기로 이동
+});
