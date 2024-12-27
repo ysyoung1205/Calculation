@@ -183,39 +183,3 @@
   font-size: 14px;
   word-wrap: break-word;
 }
-
-/* 메뉴바 스타일 */
-.navbar {
-  background-color: #007bff; /* 메뉴바 배경색 */
-  padding: 10px 20px;
-  display: flex;
-  justify-content: center; /* 중앙 정렬 */
-}
-
-.menu {
-  list-style: none;
-  display: flex;
-  margin: 0;
-  padding: 0;
-}
-
-.menu-item {
-  margin: 0 10px; /* 메뉴 항목 간 간격 */
-}
-
-.menu-link {
-  text-decoration: none;
-  color: white; /* 메뉴 링크 색상 */
-  font-size: 16px;
-  padding: 10px 15px; /* 링크 내부 여백 */
-  border-radius: 5px; /* 링크 모서리 둥글게 */
-}
-
-.menu-link:hover {
-  background-color: #0056b3; /* 호버 시 배경색 */
-}
-
-.menu-link.active {
-  background-color: #0056b3; /* 활성화된 링크 배경색 */
-  font-weight: bold; /* 활성화된 링크 굵게 */
-}

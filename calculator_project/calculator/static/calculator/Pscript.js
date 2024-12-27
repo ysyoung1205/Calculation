@@ -1,6 +1,5 @@
 let flag = false;
 let operator_clicked = false;
-// 전역 변수로 현재 모드의 최소/최대값 설정
 let currentModeLimits = {
   min: BigInt(-32768),
   max: BigInt(32767),
@@ -10,8 +9,6 @@ let currentModeLimits = {
 // 옵션 변경 시 호출되는 함수
 document.getElementById("modeSelector").addEventListener("change", function () {
   const selectedMode = this.value;
-
-  // 모드에 따른 제한 값 변경
   const MODES = {
     WORD: { min: BigInt(-32768), max: BigInt(32767), bitSize: 16 },
     DWORD: { min: BigInt(-2147483648), max: BigInt(2147483647), bitSize: 32 },
@@ -24,9 +21,6 @@ document.getElementById("modeSelector").addEventListener("change", function () {
 
   currentModeLimits = MODES[selectedMode];
   bitSize = currentModeLimits.bitSize;
-  alert(
-    `Changed to ${selectedMode} mode. Allowed range: ${currentModeLimits.min} ~ ${currentModeLimits.max}, Bit size: ${bitSize}`
-  );
 });
 
 //키보드 입력 시
@@ -48,9 +42,6 @@ document.addEventListener("keydown", function (event) {
     Pcalculate();
     event.preventDefault();
   } else if (event.key === "Backspace") {
-    //백스페이스
-    //const display = document.getElementById("display");
-    // display.value = display.value.slice(0, -1);
     deleteOne();
     event.preventDefault();
   } else {
@@ -69,7 +60,7 @@ function updateDisplayAllLayout(displayAll) {
 }
 
 function append(value) {
-  //숫자 및 '.' 버튼 처리
+  //숫자처리
   const display = document.getElementById("display");
   const displayAll = document.getElementById("displayAll");
   const lastValue = displayAll.value.slice(-1);
@@ -81,15 +72,6 @@ function append(value) {
   }
 
   if (!flag) {
-    //숫자이거나 . 이면
-    // if (value === "." && display.value.includes(".")) {
-    //   // 소수점이 이미 입력된 경우 추가 입력 방지
-    //   return;
-    // }
-    // if (value === "." && display.value === "") {
-    //   // 빈 셀에 . 입력시 0. 으로 변환
-    //   value = "0.";
-    // }
     if (lastValue === ")") {
       displayAll.value = "";
       display.value = value;
@@ -123,13 +105,9 @@ function append(value) {
     numericValue < currentModeLimits.min ||
     numericValue > currentModeLimits.max
   ) {
-    alert(
-      `Value out of range! Allowed range: ${currentModeLimits.min} ~ ${currentModeLimits.max}`
-    );
-    // display.value = ""; // 범위를 초과하면 초기화 >> 입력제한
     // 입력값을 제한 범위에 맞추기
     display.value = display.value.slice(0, -1); // 마지막 입력값 제거
-    return; // 더 이상 처리하지 않음
+    return;
   }
 
   operator_clicked = false;
@@ -160,7 +138,7 @@ function operator(value) {
   if (!flag) {
     if (!operator_clicked) {
       // 연산자가 없다면
-      let result = BigInt(display.value); //////////////////////////////////////////////////////bigint로 변경
+      let result = BigInt(display.value);
 
       if (lastValue === ")") {
         displayAll.value += value;
@@ -219,21 +197,18 @@ function parentheses(value) {
 
   // 여는 괄호 처리
   if (value === "(") {
-    console.log("lastvalue: ", lastValue);
-    if (operator_clicked || display.value === "") {
+    if (lastValue === ")") {
+      console.log("Last value is ')'");
+      displayAll.value += "*("; // 닫는 괄호 뒤에 곱셈 연산 포함한 여는 괄호 추가
+    } else if (operator_clicked || display.value === "") {
+      console.log("Operator clicked", operator_clicked);
+      console.log("display.value", display.value);
       displayAll.value += value;
     } else {
+      console.log("Default case");
       displayAll.value += display.value + "*(";
       display.value = "";
     }
-
-    // if (!isNaN(display.value) || lastValue === ")") {
-    //   console.log("lastvalue: ", lastValue.length);
-
-    //   value = display.value + "*(";
-    // }
-    // displayAll.value += value;
-
     return;
   }
 
@@ -244,31 +219,19 @@ function parentheses(value) {
     const closeCount = (displayAll.value.match(/\)/g) || []).length; // 닫는 괄호 개수
 
     if (openCount <= closeCount) {
-      // 여는 괄호보다 닫는 괄호가 많으면 추가할 수 없음
-      alert("No matching '(' for this ')'.");
       return;
     }
-
-    // if (!operator_clicked) {
     //diplay에 숫자가 입력되었을 때
     displayAll.value += display.value + value;
     display.value = "";
-    //return;
-    //}
-    // flag = true;
-    // console.log(flag);
   }
 }
-
-function RSH() {} //RSH: 비트이동, ROR 순환이동
 
 function Pcalculate() {
   const displayAll = document.getElementById("displayAll");
   const display = document.getElementById("display");
 
-  // `display.value`가 비어 있으면 `results`를 추가하지 않음
   let results = display.value ? BigInt(display.value) : "";
-  console.log("Results (BigInt):", results);
 
   const expression = display.value
     ? displayAll.value + results // `display.value`가 있으면 추가
@@ -300,22 +263,16 @@ function Pcalculate() {
         if (result < currentModeLimits.min || result > currentModeLimits.max) {
           // 범위를 벗어나면 결과를 모드에 맞게 순환
           result = (result + bitSize) % bitSize; // 음수도 포함한 순환 처리
-
           // 음수 처리 (음수일 때 2의 보수로 변환)
           if (result > currentModeLimits.max) {
             result -= bitSize; // 음수 영역으로 이동
           }
-
-          alert(`Overflow occurred! Adjusted result: ${result}`);
         }
-
-        // === 결과 반영 ===
         display.value = result;
         displayAll.value = data.expression + " = "; // 전체 계산식 업데이트
       }
       memoryUpdate = displayAll.value + display.value;
       flag = true;
-      console.log("flag: ", flag);
       convertToOthers();
       // DOM 업데이트 이후 호출
       setTimeout(() => {
@@ -357,7 +314,6 @@ function convertToOthers() {
     binary = currentValue.toString(2).padStart(bitSize, "0");
     octal = currentValue.toString(8);
     hexadecimal = currentValue.toString(16).toUpperCase();
-    console.log("bitSize", bitSize);
   } else {
     // 음수 처리: 2의 보수 계산
     binary = toTwosComplement(currentValue, bitSize);
@@ -369,25 +325,11 @@ function convertToOthers() {
   }
   decimal = currentValue.toString();
 
-  // 결과 업데이트
-  // displayBin.value = "0b" + binary;
-  // displayOct.value = "0o" + octal;
-  // displayDec.value = decimal;
-  // displayHex.value = "0x" + hexadecimal;
-
-  // let binary = currentValue.toString(2); // 2진법
-  // let octal = currentValue.toString(8); // 8진법
-  // let decimal = currentValue.toString(); //10진법
-  // let hexadecimal = currentValue.toString(16).toUpperCase(); // 16진법 (대문자)
-
-  // 2진수: 4자리 패딩 + 4비트 그룹화
   binary = binary.padStart(Math.ceil(binary.length / 4) * 4, "0"); // 4자리 배수로 패딩
-  console.log(binary);
+
   binary = binary.match(/.{1,4}/g).join(" "); // 4개씩 나누고 공백 추가
   octal = octal.replace(/\B(?=(\d{3})+(?!\d))/g, " "); // 뒤에서부터 3자리마다 공백 추가
-
   decimal = decimal.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-
   hexadecimal = hexadecimal.replace(/\B(?=(\w{4})+(?!\w))/g, " "); // 뒤에서부터 3자리마다 공백 추가
 
   displayBin.value = "0b" + binary;
