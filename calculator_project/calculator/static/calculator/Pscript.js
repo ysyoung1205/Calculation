@@ -1,22 +1,37 @@
 let flag = false;
 let operator_clicked = false;
-let currentModeLimits = {
-  min: BigInt(-32768),
-  max: BigInt(32767),
-  bitSize: 16,
-}; // 초기값: WORD
-
+let currentModeLimits = (function () {
+  const { min, max } = getSignedLimits(16);
+  return {
+    min,
+    max,
+    bitSize: 16,
+  };
+})();
+function getSignedLimits(bitSize) {
+  const half = BigInt(bitSize) - 1n;
+  const max = (1n << half) - 1n;
+  const min = -(1n << half);
+  return { min, max };
+}
 // 옵션 변경 시 호출되는 함수
 document.getElementById("modeSelector").addEventListener("change", function () {
   const selectedMode = this.value;
   const MODES = {
-    WORD: { min: BigInt(-32768), max: BigInt(32767), bitSize: 16 },
-    DWORD: { min: BigInt(-2147483648), max: BigInt(2147483647), bitSize: 32 },
-    QWORD: {
-      min: BigInt(-9223372036854775808),
-      max: BigInt(9223372036854775807),
-      bitSize: 64,
-    },
+    WORD: (function () {
+      const { min, max } = getSignedLimits(16);
+      return { min, max, bitSize: 16 };
+    })(),
+
+    DWORD: (function () {
+      const { min, max } = getSignedLimits(32);
+      return { min, max, bitSize: 32 };
+    })(),
+
+    QWORD: (function () {
+      const { min, max } = getSignedLimits(64);
+      return { min, max, bitSize: 64 };
+    })(),
   };
 
   currentModeLimits = MODES[selectedMode];
@@ -165,6 +180,10 @@ function clearDisplay() {
   //'C'
   document.getElementById("display").value = "";
   document.getElementById("displayAll").value = "";
+  document.getElementById("displayBin").value = "";
+  document.getElementById("displayOct").value = "";
+  document.getElementById("displayDec").value = "";
+  document.getElementById("displayHex").value = "";
 }
 
 function deleteOne() {
@@ -278,7 +297,8 @@ function Pcalculate() {
       setTimeout(() => {
         updateDisplayAllLayout(displayAll);
       }, 0);
-      addToMemory(memoryUpdate); // 결과를 메모리에 추가
+      updateMemoryList();
+      // addToMemory(memoryUpdate); // 결과를 메모리에 추가
     })
     .catch((error) => {
       document.getElementById("display").value = "Error!!";
@@ -345,23 +365,58 @@ document.getElementById("toggleBases").addEventListener("click", function () {
 
   if (baseContainer.classList.contains("hidden")) {
     baseContainer.classList.remove("hidden");
-
+    memorySidebar.classList.add("expanded");
     toggleButton.textContent = "Hide";
   } else {
     baseContainer.classList.add("hidden");
-
+    memorySidebar.classList.remove("expanded");
     toggleButton.textContent = "Show";
   }
 });
 
-function addToMemory(result) {
-  //결과값 메모리 list로 올리기
-  const memoryList = document.getElementById("memory-list");
-  const listItem = document.createElement("li");
+document.addEventListener("DOMContentLoaded", () => {
+  updateMemoryList();
+  setInterval(updateMemoryList, 1000); //
+});
 
-  listItem.textContent = result;
-  memoryList.appendChild(listItem);
+function updateMemoryList() {
+  fetch("/get_presults/", { method: "GET" })
+    .then((response) => response.json())
+    .then((data) => {
+      const memoryList = document.getElementById("memory-list");
+      memoryList.innerHTML = ""; // 기존 목록 초기화
+
+      data.results.forEach((item) => {
+        const li = document.createElement("li");
+        // 1) 계산식, 결과 표시
+        const textSpan = document.createElement("span");
+        textSpan.textContent = `${item.expression} = ${item.result}`;
+
+        // 2) X 버튼 생성
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "X";
+        deleteBtn.classList.add("delete-mem-btn");
+
+        // 3) X 버튼 클릭 시 삭제 함수 호출
+        deleteBtn.addEventListener("click", () => {
+          deleteMemoryItem(item.expression);
+        });
+
+        // li 구성
+        li.appendChild(textSpan);
+        li.appendChild(deleteBtn);
+
+        memoryList.appendChild(li);
+
+        // li.textContent = `${item.expression} = ${item.result}`;
+        // memoryList.appendChild(li);
+      });
+    })
+    .catch((error) => {
+      console.error("메모리 데이터를 불러오는 중 오류 발생:", error);
+    });
 }
+
 // 메모리 열기/닫기 토글
 document.getElementById("toggleMemory").addEventListener("click", function () {
   toggleMemory();
@@ -373,8 +428,108 @@ function toggleMemory() {
   if (memorySidebar.classList.contains("hidden")) {
     memorySidebar.classList.remove("hidden");
     toggleButton.textContent = "Hide";
+    updateMemoryList();
   } else {
     memorySidebar.classList.add("hidden");
     toggleButton.textContent = "Memory";
   }
 }
+
+function deleteMemoryItem(expression) {
+  // 서버로 삭제 요청
+  fetch("/delete_presult/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "X-CSRFToken": csrfToken, // Django에서 CSRF 보호를 쓰는 경우
+    },
+    body: new URLSearchParams({ expression: expression }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.message === "Result deleted") {
+        // 삭제 성공 -> 메모리 목록 갱신
+        updateMemoryList();
+      } else {
+        console.error("개별 삭제 실패:", data);
+      }
+    })
+    .catch((error) => {
+      console.error("개별 삭제 오류:", error);
+    });
+}
+
+function deleteAllMemory() {
+  // 서버로 모든 결과 삭제 요청
+  fetch("/delete_all_presults/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "X-CSRFToken": csrfToken,
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.message === "All results deleted") {
+        // 전체 삭제 성공 -> 메모리 목록 초기화
+        const memoryList = document.getElementById("memory-list");
+        memoryList.innerHTML = "";
+      } else {
+        console.error("전체 삭제 실패:", data);
+      }
+    })
+    .catch((error) => {
+      console.error("전체 삭제 오류:", error);
+    });
+}
+
+document.getElementById("deleteAllBtn").addEventListener("click", function () {
+  deleteAllMemory();
+});
+document.getElementById("uploadBtn").addEventListener("click", () => {
+  const formData = new FormData();
+  const fileInput = document.getElementById("csv-file");
+
+  if (fileInput.files.length === 0) {
+    alert("CSV 파일을 선택해주세요.");
+    return;
+  }
+
+  formData.append("csrfmiddlewaretoken", csrfToken);
+  formData.append("csv-file", fileInput.files[0]);
+
+  fetch("/upload_csv/", {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.error) {
+        alert("오류: " + data.error);
+      } else {
+        alert("업로드 성공: " + data.message);
+        // 필요시 업로드된 내용을 메모리 리스트에 추가
+        updateMemoryList();
+      }
+    })
+    .catch((error) => console.error("업로드 실패:", error));
+});
+
+document.getElementById("exportBtn").addEventListener("click", () => {
+  fetch("/export_to_csv/", {
+    method: "GET",
+  })
+    .then((response) => response.blob())
+    .then((blob) => {
+      // Blob -> 다운로드
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "calculations.csv"; // 파일명
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    })
+    .catch((error) => console.error("CSV 다운로드 오류:", error));
+});

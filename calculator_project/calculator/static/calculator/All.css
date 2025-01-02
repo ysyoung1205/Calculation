@@ -1,3 +1,21 @@
+.header-bar {
+  display: flex; /* 가로로 배치 */
+  flex-wrap: wrap;
+  align-items: center; /* 세로 정렬: 가운데 */
+  justify-content: space-between; /* h1은 왼쪽, clock은 오른쪽 끝 */
+  padding: 0 10px; /* 좌우 패딩 (옵션) */
+}
+
+.header-bar h1 {
+  margin: 10px;
+}
+
+#clock {
+  flex: 0 0 auto; /* 크기 줄어듦 방지 */
+  margin-left: auto;
+  /* 시계에 원하는 스타일 적용 */
+  font-size: 16px;
+}
 /* 메뉴바 스타일 */
 .navbar {
   background-color: #b0b0b0; /* 메뉴바 배경색 */

@@ -3,6 +3,8 @@
   justify-content: center; /*가로에서 위치*/
   margin-top: 50px;
   gap: 20px; /*사이 공간 추가*/
+  min-width: 650px; /* 최소 가로폭 800px */
+  min-height: 673; /* 최소 세로폭 600px */
 }
 
 .calculator {
@@ -163,7 +165,8 @@
   transition: max-height 0.3s ease; /* 높이 변경 애니메이션 */
 }
 
-.memory-sidebar.hidden {
+.memory-sidebar.hidden,
+.memory-sidebar.hidden.expanded {
   background-color: #ffffffac;
   color: #ffffffac;
   height: 0px; /* 숨길 때 높이 0으로 설정 */
@@ -172,7 +175,7 @@
 }
 
 .memory-sidebar.expanded {
-  height: 770px; /* 확장된 높이 */
+  height: 880px; /* 확장된 높이 */
   overflow-y: auto; /* 스크롤 활성화 */
 }
 
@@ -194,11 +197,128 @@
 }
 
 #memory-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 5px;
   padding: 5px;
   background-color: #fff;
   border: 1px solid #ddd;
-  border-radius: 3px;
+  border-radius: 4px;
   font-size: 14px;
-  word-wrap: break-word;
+  /* word-wrap: break-word; */
+}
+/* 텍스트(계산식=결과) */
+.mem-text {
+  flex: 1; /* 남은 공간 채우기 */
+  margin-right: 8px; /* 버튼과 약간 간격 */
+  word-break: break-all;
+  /* 텍스트가 길어질 때 줄바꿈. 필요하면 사용 */
+}
+/* X 버튼 (닫기 느낌) */
+.delete-mem-btn {
+  flex-shrink: 0; /* 버튼이 절대 줄어들지 않도록 지정 */
+  width: 20px;
+  height: 20px;
+  background-color: rgb(196, 191, 191);
+  border: none;
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  text-align: center;
+  /* line-height: 30px; 수직 중앙 정렬 */
+  border-radius: 4px; /* 버튼 모서리 둥글게 (옵션) */
+  transition: background-color 0.2s;
+}
+
+.delete-mem-btn:hover {
+  background-color: #e81123;
+}
+
+.delete-mem-btn:active {
+  background-color: #a60d1a;
+}
+
+/* 제목과 Delete All 버튼을 한 줄로, 오른쪽 정렬 */
+.memory-deleteAllBtn {
+  margin-left: 210px;
+  margin-bottom: 10px; /* 아래쪽 여백 */
+}
+
+/* Delete All 버튼 스타일 (원하는 대로 조정) */
+.delete-all-btn {
+  background-color: #c6c6c6;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+}
+.delete-all-btn:hover {
+  background-color: #e81123;
+}
+.delete-all-btn:active {
+  background-color: #a60d1a;
+}
+
+.csv-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* 내보내기 버튼과 업로드 폼 간 간격 */
+}
+
+.upload-form {
+  display: flex;
+  align-items: center; /* 수직 정렬 */
+  gap: 10px; /* 각 요소 간 간격 */
+  background-color: #a2d675;
+  border-radius: 4px;
+}
+
+.upload-label {
+  padding: 3px;
+  font-size: 11px;
+  font-weight: bold;
+  margin-right: 10px; /* 불러오기 텍스트 오른쪽 간격 */
+}
+
+.upload-input {
+  padding: 5px;
+  font-size: 8px;
+}
+
+.upload-btn {
+  padding: 3px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.upload-btn:hover {
+  background-color: #45a049;
+}
+.export_Btn {
+  flex-shrink: 0;
+  border: none;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  text-align: center;
+  background-color: #dbe8afdd;
+  color: #fff;
+  border-radius: 4px;
+  height: 30px;
+}
+
+.export_Btn:hover {
+  background-color: #a2d675;
+}
+.dexport_Btn:active {
+  background-color: #a60d1a;
 }

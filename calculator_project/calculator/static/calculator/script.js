@@ -132,6 +132,10 @@ function clearDisplay() {
   //'C'
   document.getElementById("display").value = "";
   document.getElementById("displayAll").value = "";
+  document.getElementById("displayBin").value = "";
+  document.getElementById("displayOct").value = "";
+  document.getElementById("displayDec").value = "";
+  document.getElementById("displayHex").value = "";
 }
 
 function deleteOne() {
@@ -227,14 +231,14 @@ function reciprocal() {
   display.value = 1 / display.value; //역수
 }
 
-function addToMemory(result) {
-  //결과값 메모리 list로 올리기
-  const memoryList = document.getElementById("memory-list");
-  const listItem = document.createElement("li");
+// function addToMemory(result) {
+//   //결과값 메모리 list로 올리기
+//   const memoryList = document.getElementById("memory-list");
+//   const listItem = document.createElement("li");
 
-  listItem.textContent = result;
-  memoryList.appendChild(listItem);
-}
+//   listItem.textContent = result;
+//   memoryList.appendChild(listItem);
+// }
 
 function calculate() {
   const displayAll = document.getElementById("displayAll");
@@ -266,7 +270,8 @@ function calculate() {
         setTimeout(() => {
           updateDisplayAllLayout(displayAll);
         }, 0);
-        addToMemory(memoryUpdate); // 결과를 메모리에 추가
+        // addToMemory(memoryUpdate); // 결과를 메모리에 추가
+        updateMemoryList();
       }
     })
     .catch((error) => {
@@ -310,6 +315,49 @@ document.getElementById("toggleBases").addEventListener("click", function () {
   }
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+  updateMemoryList(); // 페이지 열자마자 1회 호출
+  setInterval(updateMemoryList, 1000); // 이후 1초마다 주기적으로 호출
+});
+
+function updateMemoryList() {
+  fetch("/get_results/", { method: "GET" })
+    .then((response) => response.json())
+    .then((data) => {
+      const memoryList = document.getElementById("memory-list");
+      memoryList.innerHTML = ""; // 기존 목록 초기화
+
+      data.results.forEach((item) => {
+        const li = document.createElement("li");
+        // 1) 계산식, 결과 표시
+        const textSpan = document.createElement("span");
+        textSpan.textContent = `${item.expression} = ${item.result}`;
+
+        // 2) X 버튼 생성
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "X";
+        deleteBtn.classList.add("delete-mem-btn");
+
+        // 3) X 버튼 클릭 시 삭제 함수 호출
+        deleteBtn.addEventListener("click", () => {
+          deleteMemoryItem(item.expression);
+        });
+
+        // li 구성
+        li.appendChild(textSpan);
+        li.appendChild(deleteBtn);
+
+        memoryList.appendChild(li);
+
+        // li.textContent = `${item.expression} = ${item.result}`;
+        // memoryList.appendChild(li);
+      });
+    })
+    .catch((error) => {
+      console.error("메모리 데이터를 불러오는 중 오류 발생:", error);
+    });
+}
+
 // 메모리 열기/닫기 토글
 document.getElementById("toggleMemory").addEventListener("click", function () {
   toggleMemory();
@@ -320,47 +368,80 @@ function toggleMemory() {
 
   if (memorySidebar.classList.contains("hidden")) {
     memorySidebar.classList.remove("hidden");
-    toggleButton.textContent = "Hide Memory";
+    toggleButton.textContent = "Hide";
+    updateMemoryList();
   } else {
     memorySidebar.classList.add("hidden");
     toggleButton.textContent = "Memory";
   }
 }
 
-// // 메뉴바에서 모드 전환
+// // 메뉴 요소 가져오기
 // const standardMode = document.getElementById("standardMode");
 // const programmerMode = document.getElementById("programmerMode");
 
+// // 표준 계산기 클릭
 // standardMode.addEventListener("click", (e) => {
-//   e.preventDefault();
-//   standardMode.classList.add("active");
-//   programmerMode.classList.remove("active");
-//   console.log("표준 계산기 활성화");
-//   // 표준 계산기 로직 추가
+//   e.preventDefault(); // 기본 링크 동작 방지
+//   const currentUrl = window.location.origin; // 현재 도메인 (http://127.0.0.1:8000)
+//   window.location.href = `${currentUrl}/`; // 표준 계산기로 이동
 // });
 
+// // 프로그래밍 계산기 클릭
 // programmerMode.addEventListener("click", (e) => {
-//   e.preventDefault();
-//   programmerMode.classList.add("active");
-//   standardMode.classList.remove("active");
-//   console.log("프로그래밍 계산기 활성화");
-//   // 프로그래밍 계산기 로직 추가
+//   e.preventDefault(); // 기본 링크 동작 방지
+//   const currentUrl = window.location.origin; // 현재 도메인 (http://127.0.0.1:8000)
+//   window.location.href = `${currentUrl}/programmers_calculator/`; // 프로그래밍 계산기로 이동
 // });
 
-// 메뉴 요소 가져오기
-const standardMode = document.getElementById("standardMode");
-const programmerMode = document.getElementById("programmerMode");
+function deleteMemoryItem(expression) {
+  // 서버로 삭제 요청
+  fetch("/delete_result/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "X-CSRFToken": csrfToken, // Django에서 CSRF 보호를 쓰는 경우
+    },
+    body: new URLSearchParams({ expression: expression }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.message === "Result deleted") {
+        // 삭제 성공 -> 메모리 목록 갱신
+        updateMemoryList();
+      } else {
+        console.error("개별 삭제 실패:", data);
+      }
+    })
+    .catch((error) => {
+      console.error("개별 삭제 오류:", error);
+    });
+}
 
-// 표준 계산기 클릭
-standardMode.addEventListener("click", (e) => {
-  e.preventDefault(); // 기본 링크 동작 방지
-  const currentUrl = window.location.origin; // 현재 도메인 (http://127.0.0.1:8000)
-  window.location.href = `${currentUrl}/`; // 표준 계산기로 이동
-});
+function deleteAllMemory() {
+  // 서버로 모든 결과 삭제 요청
+  fetch("/delete_all_results/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "X-CSRFToken": csrfToken,
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.message === "All results deleted") {
+        // 전체 삭제 성공 -> 메모리 목록 초기화
+        const memoryList = document.getElementById("memory-list");
+        memoryList.innerHTML = "";
+      } else {
+        console.error("전체 삭제 실패:", data);
+      }
+    })
+    .catch((error) => {
+      console.error("전체 삭제 오류:", error);
+    });
+}
 
-// 프로그래밍 계산기 클릭
-programmerMode.addEventListener("click", (e) => {
-  e.preventDefault(); // 기본 링크 동작 방지
-  const currentUrl = window.location.origin; // 현재 도메인 (http://127.0.0.1:8000)
-  window.location.href = `${currentUrl}/programmers_calculator/`; // 프로그래밍 계산기로 이동
+document.getElementById("deleteAllBtn").addEventListener("click", function () {
+  deleteAllMemory();
 });

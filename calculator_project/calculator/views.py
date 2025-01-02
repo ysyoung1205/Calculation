@@ -9,11 +9,11 @@ client = MongoClient("mongodb://192.168.10.28:27017/")  # 기존 설정 그대�
 db = client["PythonTest"]  # 데이터베이스 이름
 collection = db["test2"]  # 컬렉션 이름
 
-try:
-    collection.insert_one({"test": "connection"})
-    print("Data inserted successfully")
-except Exception as e:
-    print(f"Error inserting data: {e}")
+# try:
+#     collection.insert_one({"test": "connection"})
+#     print("Data inserted successfully")
+# except Exception as e:
+#     print(f"Error inserting data: {e}")
 
 
 # 메인 화면
@@ -33,6 +33,7 @@ def calculate(request):
 
             # MongoDB에 저장
             collection.insert_one({
+                "mode": "standard",
                 "expression": expression,
                 "result": str(result)
             })
@@ -53,6 +54,13 @@ def Pcalculate(request):
         expression = request.POST.get('expression', '')  #입력된 수식
         try:
             result =  evaluate_expression(expression)
+            # MongoDB에 저장
+            collection.insert_one({
+                "mode": "programmer",
+                "expression": expression,
+                "result": str(result)
+            })
+
             return JsonResponse({'expression': expression, 'result': str(result)})  # JsonResponse로 결과 반환:
         except Exception:
             result = "Error"
@@ -61,4 +69,15 @@ def Pcalculate(request):
 
 def programmers_calculator(request):
     return render(request, 'calculator/Programmers_Calculator.html')
+
+
+# def get_results(request):
+#     """
+#     DB에 저장된 모든 계산 이력을 가져와서 JSON 형태로 응답
+#     """
+#     if request.method == "GET":
+#         # _id는 제외하고 expression, result만 가져오기
+#         results = list(collection.find({"mode": "standard"}, {"_id": 0}))
+#         return JsonResponse({"results": results})
+
 
