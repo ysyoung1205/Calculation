@@ -1,5 +1,6 @@
 let flag = false;
 let operator_clicked = false;
+let binary, octal, decimal, hexadecimal;
 let currentModeLimits = (function () {
   const { min, max } = getSignedLimits(16);
   return {
@@ -8,12 +9,14 @@ let currentModeLimits = (function () {
     bitSize: 16,
   };
 })();
+
 function getSignedLimits(bitSize) {
   const half = BigInt(bitSize) - 1n;
   const max = (1n << half) - 1n;
   const min = -(1n << half);
   return { min, max };
 }
+
 // 옵션 변경 시 호출되는 함수
 document.getElementById("modeSelector").addEventListener("change", function () {
   const selectedMode = this.value;
@@ -34,8 +37,50 @@ document.getElementById("modeSelector").addEventListener("change", function () {
     })(),
   };
 
+  //모드 업데이트
   currentModeLimits = MODES[selectedMode];
-  bitSize = currentModeLimits.bitSize;
+  const bitSize = currentModeLimits.bitSize;
+
+  const display = document.getElementById("display");
+  const displayBin = document.getElementById("displayBin");
+  const binaryValue = displayBin.value; // 현재 값 가져오기
+  let extractedBinary = binaryValue.replace(/0b/, "").replace(/\s+/g, "");
+
+  // 유효성 검사: 빈 문자열일 경우 기본값 0 설정
+  if (extractedBinary === "") {
+    extractedBinary = "0";
+    return;
+  }
+
+  // 비트 크기에 맞게 상위 비트 처리 (확장/자르기)
+  let expandedBinary = (function () {
+    if (extractedBinary.length > bitSize) {
+      //범위가 작아질때
+      return extractedBinary.slice(-bitSize);
+    } else {
+      //범위가 커질 때
+      const signBit = extractedBinary[0] || "0"; // 부호 비트 가져오기 (음수는 첫째자리 1)
+      return extractedBinary.padStart(bitSize, signBit);
+    }
+  })();
+
+  console.log("Expanded binary:", expandedBinary);
+
+  // BigInt 변환
+  let numericValue = BigInt("0b" + expandedBinary);
+
+  // 부호 비트를 기준으로 음수/양수 처리
+  if (expandedBinary[0] === "1") {
+    // 부호 비트가 1이면 음수 처리
+    const bitMask = BigInt(1) << BigInt(bitSize);
+    numericValue -= bitMask;
+  }
+
+  console.log("New value after processing:", numericValue);
+
+  // 새 값을 디스플레이에 반영
+  display.value = numericValue.toString();
+  convertToOthers(); // 2진수, 8진수, 16진수 변환 함수 호출
 });
 
 //키보드 입력 시
@@ -306,13 +351,19 @@ function Pcalculate() {
 }
 
 function toTwosComplement(value, bitSize) {
+  if (typeof value !== "bigint") {
+    value = BigInt(value);
+  }
+
   if (value >= 0) {
     console.log("toTwosComplement", value);
     return value.toString(2).padStart(bitSize, "0"); // 양수는 그대로
   }
 
   const maxValue = BigInt(2 ** bitSize); // 최대값 계산
-  console.log("toTwosComplement", maxValue);
+  console.log("음수toTwosComplement", maxValue);
+  console.log("value = ", value);
+  console.log("bitSize = ", bitSize);
   return (maxValue + value).toString(2).padStart(bitSize, "0"); // 2의 보수 계산
 }
 
@@ -326,8 +377,6 @@ function convertToOthers() {
 
   const currentValue = BigInt(display.value); // 현재 값
   const bitSize = currentModeLimits.bitSize; // 현재 모드의 비트 크기
-
-  let binary, octal, decimal, hexadecimal;
 
   if (currentValue >= 0) {
     // 양수 처리
@@ -374,10 +423,11 @@ document.getElementById("toggleBases").addEventListener("click", function () {
   }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  updateMemoryList();
-  setInterval(updateMemoryList, 1000); //
-});
+// document.addEventListener("DOMContentLoaded", () => {
+//   updateMemoryList();
+//   setInterval(updateMemoryList, 1000); //
+
+// });
 
 function updateMemoryList() {
   fetch("/get_presults/", { method: "GET" })
@@ -388,7 +438,7 @@ function updateMemoryList() {
 
       data.results.forEach((item) => {
         const li = document.createElement("li");
-        // 1) 계산식, 결과 표시
+        //계산식, 결과 표시
         const textSpan = document.createElement("span");
         textSpan.textContent = `${item.expression} = ${item.result}`;
 
@@ -407,9 +457,6 @@ function updateMemoryList() {
         li.appendChild(deleteBtn);
 
         memoryList.appendChild(li);
-
-        // li.textContent = `${item.expression} = ${item.result}`;
-        // memoryList.appendChild(li);
       });
     })
     .catch((error) => {
@@ -460,7 +507,6 @@ function deleteMemoryItem(expression) {
 }
 
 function deleteAllMemory() {
-  // 서버로 모든 결과 삭제 요청
   fetch("/delete_all_presults/", {
     method: "POST",
     headers: {
@@ -483,9 +529,16 @@ function deleteAllMemory() {
     });
 }
 
+////////////////////////////////////////////////////////////
 document.getElementById("deleteAllBtn").addEventListener("click", function () {
   deleteAllMemory();
 });
+
+document.getElementById("csv-file").addEventListener("change", function () {
+  const fileName = this.files[0]?.name || "파일 선택";
+  document.querySelector(".upload-label").textContent = fileName;
+});
+
 document.getElementById("uploadBtn").addEventListener("click", () => {
   const formData = new FormData();
   const fileInput = document.getElementById("csv-file");

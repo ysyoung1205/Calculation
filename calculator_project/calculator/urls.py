@@ -9,9 +9,6 @@ urlpatterns = [
     path('calculate/', views.calculate, name='calculate'),  # 계산 처리
     path('Pcalculate/', views.Pcalculate, name='Pcalculate'),  # 계산 처리
     # path('admin/', admin.site.urls),
-    path('', include('mycalculationapp.urls')),
+    path('', include('MDBconnect.urls')),
     # path('get_results/', views.get_results, name='get_results'),  #result불러오기    
-
-
-
 ]

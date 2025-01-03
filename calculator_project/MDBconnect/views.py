@@ -85,3 +85,28 @@ def export_to_csv(request):
 
     # 4) response 반환 -> 브라우저 다운로드
     return response
+
+def upload_csv(request):
+    if request.method == "POST":
+        csv_file = request.FILES.get("csv-file")
+        if not csv_file:
+            return JsonResponse({"error": "No file provided"}, status=400)
+
+        try:
+            decoded_file = csv_file.read().decode("utf-8").splitlines()
+            reader = csv.DictReader(decoded_file)  # CSV 헤더를 기준으로 읽기
+
+            # 3) DB에 데이터 저장
+            for row in reader:
+                # "mode", "expression", "result" 필드가 CSV에 포함되어 있어야 함
+                collection.insert_one({
+                    "mode": row.get("mode", ""),
+                    "expression": row.get("expression", ""),
+                    "result": row.get("result", "")
+                })
+
+            return JsonResponse({"message": "CSV 파일 업로드 및 데이터 저장 성공!"})
+        except Exception as e:
+            return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)

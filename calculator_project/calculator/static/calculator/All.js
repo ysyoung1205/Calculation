@@ -1,13 +1,13 @@
-function updateClock() {
-  const clockElement = document.getElementById("clock");
-  if (!clockElement) return;
-  const now = new Date();
-  const timeString = now.toLocaleTimeString();
-  clockElement.textContent = timeString;
-}
+// function updateClock() {
+//   const clockElement = document.getElementById("clock");
+//   if (!clockElement) return;
+//   const now = new Date();
+//   const timeString = now.toLocaleTimeString();
+//   clockElement.textContent = timeString;
+// }
 
-updateClock();
-setInterval(updateClock, 1000);
+// updateClock();
+// setInterval(updateClock, 1000);
 
 // 메뉴 요소 가져오기
 const standardMode = document.getElementById("standardMode");
