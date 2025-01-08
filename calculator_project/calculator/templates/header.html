@@ -1,14 +1,42 @@
+{% load static %}
 <header class="header-bar">
-  <h1>Calculator</h1>
+  <h1>{{ header_title }}</h1>
   <div id="clock"></div>
+  <div class="main">
+    <a href="{% url 'index' %}">
+      <img
+        src="{% static 'images/free-icon-home-3388840.png' %}"
+        alt="Home"
+        class="home-icon"
+      />
+    </a>
+  </div>
 </header>
 <nav class="navbar">
   <ul class="menu">
-    <li class="menu-item">
-      <a href="#" id="standardMode" class="menu-link active">표준 계산기</a>
+    <li class="menu-item dropdown">
+      <a href="#" class="menu-link"></a>
+      <ul class="dropdown-menu">
+        <li>
+          <a href="#"></a>
+        </li>
+        <li>
+          <a href="#"></a>
+        </li>
+      </ul>
     </li>
-    <li class="menu-item">
-      <a href="#" id="programmerMode" class="menu-link">프로그래머</a>
+    <li class="menu-item dropdown">
+      <a href="#" class="menu-link">Calculator</a>
+      <ul class="dropdown-menu">
+        <li>
+          <a href="#" id="standardMode" class="dropdown-item active"
+            >표준 계산기</a
+          >
+        </li>
+        <li>
+          <a href="#" id="programmerMode" class="dropdown-item">프로그래머</a>
+        </li>
+      </ul>
     </li>
   </ul>
 </nav>

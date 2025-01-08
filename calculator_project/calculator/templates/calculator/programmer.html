@@ -104,7 +104,13 @@
         </div>
         <div class="csv-container">
           <button id="exportBtn" class="export_Btn">CSV 내보내기</button>
-          <form id="upload-form" method="POST" enctype="multipart/form-data" class="upload-form">
+          {% comment %}
+          <form
+            id="upload-form"
+            method="POST"
+            enctype="multipart/form-data"
+            class="upload-form"
+          >
             {% csrf_token %}
             <label for="csv-file" class="upload-label">불러오기 </label>
             <input
@@ -117,19 +123,27 @@
             <button type="button" id="uploadBtn" class="upload-btn">
               업로드
             </button>
+          </form>
+          {% endcomment %}
         </div>
-        </form>
       </div>
 
       <!--Memory-->
       <div id="memorySidebar" class="memory-sidebar hidden">
         <h3>Memory</h3>
+        <div class="memory-date-container">
+          <input type="date" id="memoryDate" />
+          <button id="loadMemoryByDate" class="date-btn">불러오기</button>
+          <button id="showAllMemory" class="date-btn">모두보기</button>
+        </div>
         <div class="memory-deleteAllBtn">
           <button id="deleteAllBtn" class="delete-all-btn">Delete All</button>
         </div>
-        <ul id="memory-list">
-          <!--계산 결과-->
-        </ul>
+        <div class="memory-scroll-container">
+          <ul id="memory-list">
+            <!--계산 결과-->
+          </ul>
+        </div>
       </div>
     </div>
     {% csrf_token %}

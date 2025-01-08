@@ -1,10 +1,9 @@
-/* 헤더 스타일 */
 .header-bar {
-  display: flex;
+  display: flex; /* 가로로 배치 */
   flex-wrap: wrap;
   align-items: center; /* 세로 정렬: 가운데 */
-  justify-content: space-between; /* h1 왼쪽, clock 오른쪽 */
-  padding: 0 10px; /* 좌우 패딩 */
+  justify-content: space-between; /* h1은 왼쪽, clock은 오른쪽 끝 */
+  padding: 0 10px; /* 좌우 패딩 (옵션) */
 }
 
 .header-bar h1 {
@@ -12,13 +11,12 @@
 }
 
 #clock {
-  flex: 0 0 auto;
+  flex: 0 0 auto; /* 크기 줄어듦 방지 */
   margin-left: auto;
+  /* 시계에 원하는 스타일 적용 */
   font-size: 16px;
-  margin-right: 10px;
 }
-
-/* 메뉴바 스타일 */
+/* Basic styling for navbar and menu */
 .navbar {
   background-color: #333;
   padding: 10px;
@@ -46,46 +44,6 @@
   background-color: #555;
 }
 
-/* 홈 아이콘 스타일 */
-.home-icon-container {
-  flex: 0 0 auto; /* 크기 고정 */
-  margin-right: auto; /* 왼쪽으로 배치 */
-}
-
-.home-icon {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-}
-
-/* 가운데 메뉴 정렬 */
-.menu-center {
-  display: flex;
-  justify-content: center;
-  flex: 1; /* 남은 공간 사용 */
-}
-
-/* .menu-item {
-  margin: 0;
-} */
-
-/* .menu-link {
-  text-decoration: none;
-  color: white;
-  font-size: 16px;
-  padding: 10px 15px;
-  border-radius: 5px;
-} */
-/* 
-.menu-link:hover {
-  background-color: #4e5155;
-  font-weight: bold;
-} */
-
-.menu-link.active {
-  background-color: #4e5155;
-  font-weight: bold;
-}
 /* Dropdown menu styles */
 .dropdown-menu {
   display: none;

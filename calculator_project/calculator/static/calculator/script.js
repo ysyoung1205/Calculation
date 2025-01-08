@@ -258,7 +258,7 @@ function calculate() {
     .then((response) => response.json())
     .then((data) => {
       if (data.result === "Error") {
-        display.value = "Error@@"; // 오류 시 결과 표시
+        display.value = "Error"; // 오류 시 결과 표시
       } else {
         display.value = data.result; // 결과를 현재 화면에 표시
         displayAll.value = data.expression + " = "; // 전체 계산식 업데이트

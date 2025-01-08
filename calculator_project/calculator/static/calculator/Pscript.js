@@ -9,6 +9,7 @@ let currentModeLimits = (function () {
     bitSize: 16,
   };
 })();
+let currentFilterDate = null; // 날짜 필터가 없을 경우 null로 초기화
 
 function getSignedLimits(bitSize) {
   const half = BigInt(bitSize) - 1n;
@@ -124,6 +125,7 @@ function append(value) {
   const display = document.getElementById("display");
   const displayAll = document.getElementById("displayAll");
   const lastValue = displayAll.value.slice(-1);
+  const lastOperator = displayAll.value.match(/([+\-*/%]|<<|>>)$/)?.[0];
 
   if (isNaN(display.value)) {
     //NAN, ERROR 값 처리
@@ -132,28 +134,25 @@ function append(value) {
   }
 
   if (!flag) {
-    if (lastValue === ")") {
+    if (lastOperator === ")") {
       displayAll.value = "";
       display.value = value;
       return;
     }
+    if (operator_clicked) {
+      display.value = "";
+      console.log("display : ", display.value);
+      operator_clicked = false; //연산자 입력되어있을 때 숫자 입력 시 display 초기화,
+    }
     if (display.value === "0") {
       // '0' 뒤에 숫자 입력 시 대체
-      display.value = "";
       display.value = value;
-    } else if (/([+\-*//%<<>>)(])/.test(lastValue)) {
-      // 연산자 뒤에 숫자 입력 시 display 초기화 후 입력
-      if (operator_clicked) {
-        display.value = "";
-        operator_clicked = false; //////////???????
-      }
-      display.value += value;
     } else {
       // 숫자 연속 입력 처리
-      display.value += value;
+      display.value += value; //입력
     }
   } else {
-    //flag가 true 일 때, 리셋 후 새로운 계산
+    // flag가 true일 때, 리셋 후 새로운 계산
     displayAll.value = "";
     display.value = value;
     flag = false;
@@ -181,6 +180,7 @@ function operator(value) {
   const display = document.getElementById("display");
   const displayAll = document.getElementById("displayAll");
   const lastValue = displayAll.value.slice(-1);
+  const lastOperator = displayAll.value.match(/([+\-*/%]|<<|>>)$/)?.[0];
 
   if (display.value === "" && displayAll.value === "") {
     //공백 연산자 입력 X
@@ -200,7 +200,7 @@ function operator(value) {
       // 연산자가 없다면
       let result = BigInt(display.value);
 
-      if (lastValue === ")") {
+      if (lastOperator === ")") {
         displayAll.value += value;
         operator_clicked = true;
         return;
@@ -210,7 +210,12 @@ function operator(value) {
       console.log("operator_clicked : ", operator_clicked);
       console.log(typeof result);
     } else {
-      displayAll.value = displayAll.value.slice(0, -1) + value;
+      // 동일한 연산자가 연속 입력되지 않도록 처리
+      if (lastOperator === value) {
+        return;
+      }
+      displayAll.value =
+        displayAll.value.slice(0, -lastOperator.length) + value;
     }
   } else {
     ////flag가 true 일 때, 이어서 계산
@@ -294,8 +299,15 @@ function parentheses(value) {
 function Pcalculate() {
   const displayAll = document.getElementById("displayAll");
   const display = document.getElementById("display");
+  const mode = document.getElementById("modeSelector").value; // 선택된 모드 가져오기
 
   let results = display.value ? BigInt(display.value) : "";
+  const bitSize =
+    document.getElementById("modeSelector").value === "WORD"
+      ? 16
+      : document.getElementById("modeSelector").value === "DWORD"
+      ? 32
+      : 64;
 
   const expression = display.value
     ? displayAll.value + results // `display.value`가 있으면 추가
@@ -310,7 +322,7 @@ function Pcalculate() {
       "Content-Type": "application/x-www-form-urlencoded",
       "X-CSRFToken": csrfToken,
     },
-    body: "expression=" + encodeURIComponent(expression),
+    body: `expression=${encodeURIComponent(expression)}&bit_size=${bitSize}`,
   })
     .then((response) => response.json())
     .then((data) => {
@@ -342,7 +354,7 @@ function Pcalculate() {
       setTimeout(() => {
         updateDisplayAllLayout(displayAll);
       }, 0);
-      updateMemoryList();
+      // updateMemoryList();
       // addToMemory(memoryUpdate); // 결과를 메모리에 추가
     })
     .catch((error) => {
@@ -387,7 +399,6 @@ function convertToOthers() {
     // 음수 처리: 2의 보수 계산
     binary = toTwosComplement(currentValue, bitSize);
     octal = BigInt("0b" + binary).toString(8);
-
     hexadecimal = BigInt("0b" + binary)
       .toString(16)
       .toUpperCase();
@@ -423,12 +434,6 @@ document.getElementById("toggleBases").addEventListener("click", function () {
   }
 });
 
-// document.addEventListener("DOMContentLoaded", () => {
-//   updateMemoryList();
-//   setInterval(updateMemoryList, 1000); //
-
-// });
-
 function updateMemoryList() {
   fetch("/get_presults/", { method: "GET" })
     .then((response) => response.json())
@@ -438,9 +443,22 @@ function updateMemoryList() {
 
       data.results.forEach((item) => {
         const li = document.createElement("li");
-        //계산식, 결과 표시
+        // _id 값을 li의 data-id 속성에 저장
+        li.setAttribute("data-id", item._id || "");
+
+        //type추가
+        const type_Span = document.createElement("span");
+        const type = item.type || "undefined"; // 기본값 "undefined"
+        type_Span.textContent = type;
+        // 클래스 추가 시 undefined 체크
+        type_Span.classList.add(
+          "type-span",
+          type ? `${type.toLowerCase()}-type` : "undefined-type" // 타입별 클래스 추가
+        );
+
         const textSpan = document.createElement("span");
-        textSpan.textContent = `${item.expression} = ${item.result}`;
+        textSpan.classList.add("mem-text"); // 메모 CSS 클래스
+        textSpan.textContent = `${item.expression} ${item.result}`;
 
         // 2) X 버튼 생성
         const deleteBtn = document.createElement("button");
@@ -449,10 +467,13 @@ function updateMemoryList() {
 
         // 3) X 버튼 클릭 시 삭제 함수 호출
         deleteBtn.addEventListener("click", () => {
-          deleteMemoryItem(item.expression);
+          const id = li.getAttribute("data-id"); // data-id 속성에서 _id 가져오기
+          const expression = item.expression; // 수식
+          deleteMemoryItem(expression, id);
         });
 
         // li 구성
+        li.appendChild(type_Span);
         li.appendChild(textSpan);
         li.appendChild(deleteBtn);
 
@@ -482,27 +503,154 @@ function toggleMemory() {
   }
 }
 
-function deleteMemoryItem(expression) {
-  // 서버로 삭제 요청
+document.getElementById("loadMemoryByDate").addEventListener("click", () => {
+  const dateVal = document.getElementById("memoryDate").value;
+  if (!dateVal) {
+    alert("날짜를 입력하세요.");
+    return;
+  }
+  loadMemoryByDate(dateVal);
+});
+
+function loadMemoryByDate(dateVal) {
+  const params = new URLSearchParams();
+  params.append("date", dateVal);
+
+  // POST 요청
+  fetch("/get_presults_by_date_post", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "X-CSRFToken": csrfToken,
+    },
+    body: params.toString(),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      const memoryList = document.getElementById("memory-list");
+      memoryList.innerHTML = ""; // 기존 목록 초기화
+
+      if (!data.results || data.results.length === 0) {
+        // 데이터가 없을 경우 메시지 표시
+        const emptyMessage = document.createElement("p");
+        emptyMessage.textContent = "조회된 데이터가 없습니다.";
+        emptyMessage.classList.add("empty-message");
+        memoryList.appendChild(emptyMessage);
+        currentFilterDate = dateVal;
+        return;
+      }
+      currentFilterDate = dateVal; //날짜선택필터
+      data.results.forEach((item) => {
+        const li = document.createElement("li");
+        li.setAttribute("data-id", item._id || "");
+
+        const type_Span = document.createElement("span"); // type
+        const type = item.type || "undefined"; // 기본값
+        type_Span.textContent = type;
+        type_Span.classList.add(
+          "type-span",
+          type ? `${type.toLowerCase()}-type` : "undefined"
+        );
+
+        const textSpan = document.createElement("span"); // 계산 결과
+        textSpan.classList.add("mem-text");
+        textSpan.textContent = `${item.expression} ${item.result}`;
+
+        const deleteBtn = document.createElement("button"); // X 버튼
+        deleteBtn.textContent = "X";
+        deleteBtn.classList.add("delete-mem-btn");
+
+        // 3) X 버튼 클릭 시 삭제 함수 호출
+        deleteBtn.addEventListener("click", () => {
+          const id = li.getAttribute("data-id"); // data-id 속성에서 _id 가져오기
+          const expression = item.expression; // 수식
+          deleteMemoryItem(expression, id);
+        });
+
+        li.appendChild(type_Span);
+        li.appendChild(textSpan);
+        li.appendChild(deleteBtn);
+
+        memoryList.appendChild(li);
+      });
+    })
+    .catch((error) => console.error("날짜 조회 에러:", error));
+}
+
+function refreshMemoryList() {
+  if (currentFilterDate) {
+    // 현재 날짜필터가 켜져 있으면 그 날짜로 다시 조회
+    loadMemoryByDate(currentFilterDate);
+  } else {
+    // 아니면 전체 목록
+    updateMemoryList();
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  //초당 refresh
+  setInterval(() => {
+    if (currentFilterDate) {
+      refreshMemoryList(); // 날짜 필터가 설정된 경우 해당 날짜로 갱신
+    } else {
+      updateMemoryList(); // 전체 목록 갱신
+    }
+  }, 1000);
+});
+
+//개별삭제
+function deleteMemoryItem(expression, id) {
+  console.log("expression", expression);
+  console.log("Deleting item with ID:", id);
   fetch("/delete_presult/", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       "X-CSRFToken": csrfToken, // Django에서 CSRF 보호를 쓰는 경우
     },
-    body: new URLSearchParams({ expression: expression }),
+    body: new URLSearchParams({ expression: expression, id: id }),
   })
     .then((response) => response.json())
     .then((data) => {
       if (data.message === "Result deleted") {
         // 삭제 성공 -> 메모리 목록 갱신
-        updateMemoryList();
+        refreshMemoryList();
       } else {
         console.error("개별 삭제 실패:", data);
       }
     })
     .catch((error) => {
       console.error("개별 삭제 오류:", error);
+    });
+}
+
+//날짜별삭제
+function deleteAllMemoryByDate(dateVal) {
+  const params = new URLSearchParams();
+  params.append("date", dateVal);
+
+  fetch("/delete_all_presultsByDate/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "X-CSRFToken": csrfToken,
+    },
+    body: params.toString(),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.deleted_count > 0) {
+        // 날짜별 삭제 성공 -> 화면에서 필터링된 메모리 제거
+        const memoryList = document.getElementById("memory-list");
+        memoryList.innerHTML = ""; // 필터링된 목록 초기화
+        alert("선택한 날짜의 메모리가 삭제되었습니다.");
+        refreshMemoryList();
+      } else {
+        console.error("날짜별 삭제 실패:", data);
+      }
+    })
+    .catch((error) => {
+      console.error("날짜별 삭제 오류:", error);
     });
 }
 
@@ -529,47 +677,32 @@ function deleteAllMemory() {
     });
 }
 
-////////////////////////////////////////////////////////////
 document.getElementById("deleteAllBtn").addEventListener("click", function () {
-  deleteAllMemory();
-});
-
-document.getElementById("csv-file").addEventListener("change", function () {
-  const fileName = this.files[0]?.name || "파일 선택";
-  document.querySelector(".upload-label").textContent = fileName;
-});
-
-document.getElementById("uploadBtn").addEventListener("click", () => {
-  const formData = new FormData();
-  const fileInput = document.getElementById("csv-file");
-
-  if (fileInput.files.length === 0) {
-    alert("CSV 파일을 선택해주세요.");
-    return;
+  // 날짜 필터 활성화 여부 확인
+  if (currentFilterDate) {
+    const userConfirmed = confirm(
+      `${currentFilterDate} 날짜의 메모리를 삭제하시겠습니까?`
+    );
+    if (userConfirmed) {
+      deleteAllMemoryByDate(currentFilterDate); // 선택된 날짜의 메모리만 삭제
+    }
+  } else {
+    const userConfirmed = confirm("모든 메모리를 삭제하시겠습니까?");
+    if (userConfirmed) {
+      deleteAllMemory(); // 전체 삭제
+    }
   }
-
-  formData.append("csrfmiddlewaretoken", csrfToken);
-  formData.append("csv-file", fileInput.files[0]);
-
-  fetch("/upload_csv/", {
-    method: "POST",
-    body: formData,
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.error) {
-        alert("오류: " + data.error);
-      } else {
-        alert("업로드 성공: " + data.message);
-        // 필요시 업로드된 내용을 메모리 리스트에 추가
-        updateMemoryList();
-      }
-    })
-    .catch((error) => console.error("업로드 실패:", error));
 });
 
+//export
 document.getElementById("exportBtn").addEventListener("click", () => {
-  fetch("/export_to_csv/", {
+  const selectedDate = document.getElementById("memoryDate").value; // 날짜 입력 필드의 값
+  // 요청 URL 생성 (날짜 포함)
+  let url = "/export_to_csv/";
+  if (selectedDate) {
+    url += `?date=${selectedDate}`; // 날짜를 쿼리 문자열로 추가
+  }
+  fetch(url, {
     method: "GET",
   })
     .then((response) => response.blob())
@@ -578,11 +711,20 @@ document.getElementById("exportBtn").addEventListener("click", () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "calculations.csv"; // 파일명
+      a.download = selectedDate
+        ? `calculations_${selectedDate}.csv`
+        : "calculations.csv"; // 파일명 설정
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
     })
     .catch((error) => console.error("CSV 다운로드 오류:", error));
+});
+
+document.getElementById("showAllMemory").addEventListener("click", () => {
+  // "모두 보기" → 원래 있던 전체 메모리 목록 불러오기
+  currentFilterDate = null; // 날짜 필터링 해제
+  document.getElementById("memoryDate").value = ""; // 날짜 입력 필드 리셋
+  updateMemoryList();
 });
