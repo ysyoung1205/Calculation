@@ -6,8 +6,8 @@ function updateClock() {
   clockElement.textContent = timeString;
 }
 
-updateClock();
-setInterval(updateClock, 1000);
+// updateClock();
+// setInterval(updateClock, 1000);
 
 // 메뉴 요소 가져오기
 const standardMode = document.getElementById("standardMode");

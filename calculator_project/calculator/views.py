@@ -5,9 +5,13 @@ from utils import evaluate_expression
 from datetime import datetime, timezone, timedelta
 
 # MongoDB 설정
-client = MongoClient("mongodb://192.168.10.28:27017/")  
-db = client["PythonTest"]  # 데이터베이스 이름
-collection = db["test2"]  # 컬렉션 이름
+# client = MongoClient("mongodb://192.168.10.28:27017/")  
+# db = client["PythonTest"]  # 데이터베이스 이름
+# collection = db["test2"]  # 컬렉션 이름
+
+client = MongoClient("mongodb://localhost:27017/")  # 기존 설정 그대로 사용
+db = client["Project"]  # 데이터베이스 이름
+collection = db["Calculator"]  # 컬렉션 이름
 
 def index(request):
     return render(request, 'index.html', {'header_title': 'Main'})
