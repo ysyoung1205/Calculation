@@ -1,0 +1,51 @@
+.weatherdata {
+  /* 페이지 중앙 정렬을 위해 폭 지정 후 margin:auto */
+  width: 90%;
+  margin: 20px auto;
+  /* Flex 컨테이너로 설정 */
+  display: flex;
+  /* flex-wrap: wrap;  ← 화면이 좁아지면 아래로 내려가게 하려면 주석 해제 */
+  align-items: flex-start; /* 수직 정렬(위쪽 맞춤) */
+  justify-content: space-between; /* 좌우 공간 분배 */
+}
+
+.weatherchart {
+  width: 50%;
+  margin-right: 2%; /* 오른쪽 살짝 여백 */
+}
+.weatherchart2 {
+  width: 50%;
+  margin-left: 2%; /* 오른쪽 살짝 여백 */
+}
+/* .weatherchart canvas {
+  /* 캔버스에 직접 크기 지정 가능 (HTML에서 width/height 지정 시 우선) */
+/* width: 100%;
+  height: auto;
+} */
+*/ .wtable {
+  width: 100%;
+  text-align: center;
+  border-collapse: collapse; /* 테두리 겹침 방지 */
+  margin-top: 20px;
+}
+
+.wtable th,
+.wtable td {
+  border: 1px solid black; /* 테두리 추가 */
+  padding: 5px;
+}
+
+.wtable th {
+  background-color: #f2f2f2; /* 헤더 배경색 */
+}
+
+/* .custom-tooltip {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px;
+  border-radius: 4px;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  white-space: nowrap;
+} */

@@ -46,8 +46,8 @@ ROOT_URLCONF = 'calculator_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
+        'DIRS': [], # 앱별 templates 폴더를 자동으로 검색
+        'APP_DIRS': True, # APP_DIRS가 True여야 앱 내 templates 폴더를 검색
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',

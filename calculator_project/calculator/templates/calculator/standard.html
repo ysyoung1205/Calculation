@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Calculator</title>
     <link rel="stylesheet" href="{% static 'calculator/styles.css' %}" />
-    <link rel="stylesheet" href="{% static 'calculator/All.css' %}" />
+    <link rel="stylesheet" href="{% static 'All.css' %}" />
   </head>
   <body>
     {% include "header.html" %}
@@ -98,6 +98,6 @@
       const csrfToken = "{{ csrf_token }}";
     </script>
     <script src="{% static 'calculator/script.js' %}"></script>
-    <script src="{% static 'calculator/All.js' %}"></script>
+    <script src="{% static 'All.js' %}"></script>
   </body>
 </html>

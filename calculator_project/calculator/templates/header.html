@@ -29,12 +29,45 @@
       <a href="#" class="menu-link">Calculator</a>
       <ul class="dropdown-menu">
         <li>
-          <a href="#" id="standardMode" class="dropdown-item active"
+          <a
+            href="{% url 'standard' %}"
+            {%
+            comment
+            %}
+            id="standardMode"
+            {%
+            endcomment
+            %}
+            class="dropdown-item active"
             >표준 계산기</a
           >
         </li>
         <li>
-          <a href="#" id="programmerMode" class="dropdown-item">프로그래머</a>
+          <a
+            href="{% url 'programmer' %}"
+            {%
+            comment
+            %}
+            id="programmerMode"
+            {%
+            endcomment
+            %}
+            class="dropdown-item"
+            >프로그래머</a
+          >
+        </li>
+      </ul>
+    </li>
+    <li class="menu-item dropdown">
+      <a href="#" class="menu-link">Weather</a>
+      <ul class="dropdown-menu">
+        <li>
+          <a href="{% url 'weatherapi:weather1' %}" class="dropdown-item active"
+            >날씨 페이지</a
+          >
+        </li>
+        <li>
+          <a href="#" id="" class="dropdown-item"></a>
         </li>
       </ul>
     </li>

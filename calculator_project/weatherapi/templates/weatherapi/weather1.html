@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+    <link rel="stylesheet" href="{% static 'weatherapi/Wstyles.css' %}" />
+    <link rel="stylesheet" href="{% static 'All.css' %}" />
+  </head>
+  <body>
+    {% include "header.html" %}
+    <div class="weatherdata">
+      <h1>시간(기간) 날씨</h1>
+      <!-- 관측소 선택 -->
+      <form method="get" action="{% url 'weatherapi:weather1' %}">
+        <label for="station">관측지점:</label>
+        <select name="station" id="station">
+          <option value="119">수원시</option>
+          <option value="108">서울시</option>
+          <option value="184">제주도</option>
+          <option value="247">남원</option>
+        </select>
+
+        <!-- 날짜 선택 -->
+        <label for="date">날짜:</label>
+        <input type="date" name="date" id="date" value="{{ default_date }}" />
+
+        <!-- 검색 버튼 -->
+        <button type="submit">Search</button>
+        <button type="reset" id="resetZoom">Reset</button>
+      </form>
+
+      {% comment %}
+      <pre>
+        Labels: {{ labels }}
+        Temperature: {{ temperature_data }}
+        Humidity: {{ humidity_data }}
+    </pre
+      >
+      {% endcomment %}
+      <div class="weatherchart">
+        <canvas id="myChart"></canvas>
+      </div>
+      <div class="weatherchart2">
+        <canvas id="myChart" width="800" height="400"></canvas>
+      </div>
+
+      <table class="wtable">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Temperature (°C)</th>
+            <th>Humidity (%)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in weather_table %}
+          <tr>
+            <td>{{ row.time }}</td>
+            <td>{{ row.temperature }}</td>
+            <td>{{ row.humidity }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <script>
+      const stationData = {
+        station: "{{ station }}",
+        date: "{{ date }}",
+        labels: {{ labels|safe }},
+        temperature_data: {{ temperature_data|safe }},
+        humidity_data: {{ humidity_data|safe }}
+      };
+    </script>
+    <script src="{% static 'weatherapi/Wscript.js' %}"></script>
+    <script src="{% static 'All.js' %}"></script>
+  </body>
+</html>

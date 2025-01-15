@@ -9,6 +9,6 @@ urlpatterns = [
     path('calculate/', views.calculate, name='calculate'),  # 계산 처리
     path('Pcalculate/', views.Pcalculate, name='Pcalculate'),  # 계산 처리
     path('', include('MDBconnect.urls')),
-    path('', include('weatherapi.urls')),
+    path('weatherapi/', include('weatherapi.urls')),
 
 ]

@@ -22,6 +22,8 @@ def standard(request):
 def programmer(request):
     return render(request, 'calculator/programmer.html', {'header_title': 'Calculator - programmer '})
 
+
+
 # 계산 처리
 def calculate(request):
     if request.method == 'POST':

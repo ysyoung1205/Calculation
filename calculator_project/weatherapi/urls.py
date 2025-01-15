@@ -5,5 +5,6 @@ app_name = 'weatherapi'
 
 urlpatterns = [
     # path('fetch/', views.fetch_and_save_weather, name='fetch_weather'),
-    path('chart/', views.chart_view, name='chart'), # chart/로 접근 시 실행
+    path('weather1/', views.weather1, name='weather1'), # /weatherapi/weather1/ 경로로 접근
+    # path('weatherApi/', views.weatherApi, name='weatherApi'), 
 ]
