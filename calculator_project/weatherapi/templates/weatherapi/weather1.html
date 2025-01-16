@@ -13,39 +13,43 @@
   <body>
     {% include "header.html" %}
     <div class="weatherdata">
+      {% comment %}
       <h1>시간(기간) 날씨</h1>
+      {% endcomment %}
       <!-- 관측소 선택 -->
-      <form method="get" action="{% url 'weatherapi:weather1' %}">
-        <label for="station">관측지점:</label>
-        <select name="station" id="station">
-          <option value="119">수원시</option>
-          <option value="108">서울시</option>
-          <option value="184">제주도</option>
-          <option value="247">남원</option>
-        </select>
+      <div class="select-container">
+        <form method="get" action="{% url 'weather_api:weather1' %}">
+          <label for="station">관측지점:</label>
+          <select name="station" id="station">
+            <option value="119">수원시</option>
+            <option value="108">서울시</option>
+            <option value="184">제주도</option>
+            <option value="247">남원</option>
+          </select>
 
-        <!-- 날짜 선택 -->
-        <label for="date">날짜:</label>
-        <input type="date" name="date" id="date" value="{{ default_date }}" />
+          <!-- 날짜 선택 -->
+          <label for="date">날짜:</label>
+          <input type="date" name="date" id="date" value="{{ default_date }}" />
 
-        <!-- 검색 버튼 -->
-        <button type="submit">Search</button>
-        <button type="reset" id="resetZoom">Reset</button>
-      </form>
-
+          <!-- 검색 버튼 -->
+          <button type="submit">Search</button>
+          <button type="reset" id="resetZoom">Reset</button>
+        </form>
+      </div>
       {% comment %}
       <pre>
         Labels: {{ labels }}
         Temperature: {{ temperature_data }}
         Humidity: {{ humidity_data }}
-    </pre
+     </pre
       >
       {% endcomment %}
-      <div class="weatherchart">
-        <canvas id="myChart"></canvas>
-      </div>
-      <div class="weatherchart2">
-        <canvas id="myChart" width="800" height="400"></canvas>
+      <div class="weatherchart-container">
+        <div class="weatherchart">
+          <canvas id="myChart"></canvas>
+        </div>
+
+        <div class="weatherchart2"></div>
       </div>
 
       <table class="wtable">

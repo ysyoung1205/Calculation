@@ -4,17 +4,48 @@
   margin: 20px auto;
   /* Flex 컨테이너로 설정 */
   display: flex;
-  /* flex-wrap: wrap;  ← 화면이 좁아지면 아래로 내려가게 하려면 주석 해제 */
+  /* flex-wrap: wrap; */
+  flex-direction: column;
   align-items: flex-start; /* 수직 정렬(위쪽 맞춤) */
   justify-content: space-between; /* 좌우 공간 분배 */
 }
+.select-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Adjust as needed for alignment */
+  margin: 10px 10px 20px; /* Adjust spacing as necessary */
+}
 
+.select-container form {
+  display: flex;
+  flex-direction: row; /* Keeps label, dropdown, and buttons in line */
+  gap: 10px; /* Adds spacing between elements */
+}
+
+.select-container select,
+.select-container input,
+.select-container button {
+  margin: 5px 0; /* Add some spacing */
+}
+
+.weatherchart-container {
+  width: 100%;
+  margin: 10px 0;
+}
 .weatherchart {
   width: 50%;
+  min-width: 400px;
   margin-right: 2%; /* 오른쪽 살짝 여백 */
 }
+/* 실제 canvas 크기를 100%로 지정 (인라인 width/height보다 우선시키려면 !important도 가능) */
+.weatherchart canvas {
+  width: 100% !important;
+  height: auto !important;
+  display: block; /* 불필요한 여백 제거를 위해 block */
+}
 .weatherchart2 {
-  width: 50%;
+  width: 45%;
+  min-width: 300px;
   margin-left: 2%; /* 오른쪽 살짝 여백 */
 }
 /* .weatherchart canvas {
