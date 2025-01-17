@@ -25,6 +25,7 @@ const myChart = new Chart(ctx, {
         label: "습도 (%)",
         data: stationData.humidity_data,
         borderColor: "rgba(54, 162, 235, 1)",
+        backgroundColor: "rgba(54, 162, 235, 1)",
         borderWidth: 2,
         type: "bar", // 막대 그래프로 표시
         yAxisID: "humiAxis",

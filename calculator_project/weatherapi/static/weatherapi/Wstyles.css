@@ -1,13 +1,35 @@
 .weatherdata {
-  /* 페이지 중앙 정렬을 위해 폭 지정 후 margin:auto */
   width: 90%;
   margin: 20px auto;
-  /* Flex 컨테이너로 설정 */
   display: flex;
-  /* flex-wrap: wrap; */
   flex-direction: column;
-  align-items: flex-start; /* 수직 정렬(위쪽 맞춤) */
-  justify-content: space-between; /* 좌우 공간 분배 */
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* 차트와 테이블 각각을 flex item으로 설정 */
+.weatherchart-container {
+  width: 100%;
+}
+.table-container {
+  width: 100%;
+}
+/* 화면이 충분히 넓어지면 가로 배치로 변경 */
+@media (min-width: 1000px) {
+  .weatherdata {
+    flex-direction: row;
+    align-items: flex-start; /* 가로 배치 시 위쪽 기준으로 정렬 */
+  }
+
+  .weatherchart-container {
+    width: 50%; /* 반반씩 나누고 싶다면 50% */
+    margin-right: 1rem; /* 여백을 조금 줄 수도 있음 */
+  }
+
+  .table-container {
+    width: 50%;
+  }
 }
 .select-container {
   display: flex;
@@ -33,7 +55,8 @@
   margin: 10px 0;
 }
 .weatherchart {
-  width: 50%;
+  /* width: 50%; */
+  width: 100%;
   min-width: 400px;
   margin-right: 2%; /* 오른쪽 살짝 여백 */
 }
@@ -53,7 +76,7 @@
 /* width: 100%;
   height: auto;
 } */
-*/ .wtable {
+.wtable {
   width: 100%;
   text-align: center;
   border-collapse: collapse; /* 테두리 겹침 방지 */

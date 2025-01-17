@@ -8,6 +8,6 @@ urlpatterns = [
     path('weather1/', views.weather1, name='weather1'), # /weatherapi/weather1/ 경로로 접근
     # path('weatherApi/', views.weatherApi, name='weatherApi'), 
     # path("data_from_db/", views.get_weather_data_from_db, name="get_weather_from_db"),
-    path("chart/", views.weather_chart_view, name="weather_chart"),
+    # path("chart/", views.weather_chart_view, name="weather_chart"),
     path("weather2/", views.weather2, name="weather2"),
 ]

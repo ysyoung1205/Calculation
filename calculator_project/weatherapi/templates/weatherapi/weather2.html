@@ -14,7 +14,7 @@
     {% include "header.html" %}
 
     <div class="select-container">
-      <form method="get" action="">
+      <form method="get" action="{% url 'weather_api:weather2' %}">
         <!-- 관측소 선택 -->
         <label for="station">관측지점:</label>
         <select name="station" id="station">
@@ -46,54 +46,62 @@
         <button type="reset" id="resetZoom">Reset</button>
       </form>
     </div>
+
     {% if error %}
     <p style="color: red">{{ error }}</p>
     {% else %}
     <!-- 차트를 표시할 canvas -->
-    <canvas id="weatherChart"></canvas>
-    <script>
-      const labels = JSON.parse("{{ labels|safe|escapejs }}");
-      const taMax = JSON.parse("{{ ta_max|safe|escapejs }}");
-      const taMin = JSON.parse("{{ ta_min|safe|escapejs }}");
-      const taAvg = JSON.parse("{{ ta_avg|safe|escapejs }}");
-
-      const ctx = document.getElementById("weatherChart").getContext("2d");
-      new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: "최고기온",
-              data: taMax,
-              borderColor: "red",
-              fill: false,
-            },
-            {
-              label: "최저기온",
-              data: taMin,
-              borderColor: "blue",
-              fill: false,
-            },
-            {
-              label: "평균기온",
-              data: taAvg,
-              borderColor: "green",
-              fill: false,
-            },
-          ],
-        },
-        options: {
-          scales: {
-            x: { title: { display: true, text: "날짜" } },
-            y: { title: { display: true, text: "기온" } },
-          },
-        },
-      });
-    </script>
+    <canvas id="myChart2"></canvas>
     {% endif %}
 
-    <script src="{% static 'weatherapi/Wscript2.js' %}"></script>
+    <script>
+      try {
+        const labels = {{ labels|default:"[]"|safe }};
+        const taMax = {{ ta_max|default:"[]"|safe }};
+        const taMin = {{ ta_min|default:"[]"|safe }};
+        const taAvg = {{ ta_avg|default:"[]"|safe }};
+
+        console.log("Parsed Data:", labels, taMax, taMin, taAvg);  // ✅ 디버깅용 콘솔 출력
+
+        const ctx = document.getElementById("myChart2").getContext("2d");
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "최고기온",
+                data: taMax,
+                borderColor: "red",
+                fill: false,
+              },
+              {
+                label: "최저기온",
+                data: taMin,
+                borderColor: "blue",
+                fill: false,
+              },
+              {
+                label: "평균기온",
+                data: taAvg,
+                borderColor: "green",
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            scales: {
+              x: { title: { display: true, text: "날짜" } },
+              y: { title: { display: true, text: "기온" }, min: -30, max: 50 },
+            },
+          },
+
+        });
+      } catch (error) {
+        console.error("JSON Parsing Error:", error);
+      }
+    </script>
+
     <script src="{% static 'All.js' %}"></script>
   </body>
 </html>

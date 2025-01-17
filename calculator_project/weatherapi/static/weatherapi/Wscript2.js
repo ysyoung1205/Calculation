@@ -1,89 +1,54 @@
 document.addEventListener("DOMContentLoaded", function () {
-  console.log("Weather script loaded.");
+  // 폼 요소 값 설정
+  document.getElementById("station").value = "{{ station }}";
+  document.getElementById("start_date").value = "{{ start_date }}";
+  document.getElementById("end_date").value = "{{ end_date }}";
 
-  const searchButton = document.querySelector("button[type='submit']");
-
-  searchButton.addEventListener("click", function (event) {
-    event.preventDefault(); // 기본 동작(페이지 새로고침) 방지
-    fetchChartData(); // 차트 데이터 가져오기 및 생성
-  });
-});
-
-function fetchChartData() {
-  const station = document.getElementById("station").value;
-  const startDate = document.getElementById("start_date").value;
-  const endDate = document.getElementById("end_date").value;
-
-  console.log("Fetching data for:", station, startDate, endDate);
-
-  fetch(
-    `/weather_api/weather2/?station=${station}&start_date=${startDate}&end_date=${endDate}`
-  )
-    .then((response) => response.json())
-    .then((data) => {
-      console.log("Fetched Data:", data);
-      updateChart(data);
-    })
-    .catch((error) => {
-      console.error("Error fetching weather data:", error);
-    });
-}
-
-function updateChart(stationData) {
-  const ctx = document.getElementById("weatherChart").getContext("2d");
-
-  if (window.weatherChart) {
-    window.weatherChart.destroy(); // 기존 차트 삭제
-  }
-
-  window.weatherChart = new Chart(ctx, {
+  // 차트 생성
+  const ctx = document.getElementById("myChart2").getContext("2d");
+  const myChart2 = new Chart(ctx, {
     type: "line",
     data: {
-      labels: stationData.labels, // 관측 날짜
+      labels: labels,
       datasets: [
         {
-          label: "최고 기온 (°C)",
-          data: stationData.ta_max,
+          label: "최고기온",
+          data: taMax,
           borderColor: "red",
+          borderWidth: 2,
+          pointBackgroundColor: "red",
           fill: false,
         },
         {
-          label: "최저 기온 (°C)",
-          data: stationData.ta_min,
+          label: "최저기온",
+          data: taMin,
           borderColor: "blue",
+          borderWidth: 2,
+          pointBackgroundColor: "blue",
           fill: false,
         },
         {
-          label: "일평균 기온 (°C)",
-          data: stationData.ta_avg,
+          label: "평균기온",
+          data: taAvg,
           borderColor: "green",
+          borderWidth: 2,
+          pointBackgroundColor: "green",
           fill: false,
         },
       ],
     },
     options: {
       responsive: true,
-      plugins: {
-        legend: {
-          position: "top",
-        },
-      },
+      maintainAspectRatio: false,
       scales: {
-        x: {
-          title: {
-            display: true,
-            text: "날짜",
-          },
-        },
-        y: {
-          title: {
-            display: true,
-            text: "기온 (°C)",
-          },
-        },
+        x: { title: { display: true, text: "날짜" } },
+        y: { title: { display: true, text: "기온" }, min: -30, max: 50 },
       },
     },
   });
 
-  console.log("Chart updated successfully!");
-}
+  // // 🔄 줌 리셋 버튼 기능 추가
+  // document.getElementById("resetZoom").addEventListener("click", () => {
+  //   myChart2.resetZoom();
+  // });
+});
