@@ -29,11 +29,11 @@ Python(Django), MongoDB, JavaScript를 활용한 웹 기반 계산기 및 기상
 
 ## 🖼️ 계산기 화면 예시
 
-![계산기 이미지](https://github.com/ysyoung1205/calculator_project/blob/main/calculator.png?raw=true)
+![계산기](https://github.com/ysyoung1205/Calculation/blob/main/calculator_project/calculator.png)
 
 ## 🌦️ 날씨 차트 예시
 
-![날씨 차트](https://github.com/ysyoung1205/calculator_project/blob/main/weatherChart.png?raw=true)
+![날씨 차트](https://github.com/ysyoung1205/Calculation/blob/main/calculator_project/weatherChart.png4)
 
 
 
