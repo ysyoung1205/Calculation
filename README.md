@@ -33,7 +33,7 @@ Python(Django), MongoDB, JavaScript를 활용한 웹 기반 계산기 및 기상
 
 ## 🌦️ 날씨 차트 예시
 
-![날씨 차트](https://github.com/ysyoung1205/Calculation/blob/main/calculator_project/weatherChart.png4)
+![날씨 차트](https://github.com/ysyoung1205/Calculation/blob/main/calculator_project/weatherChart.png)
 
 
 
